@@ -1,0 +1,27 @@
+.yp-pip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  opacity: 0.9;
+  cursor: pointer;
+}
+
+.yp-pip:hover,
+.yp-pip:focus-visible {
+  opacity: 1;
+}
+
+.yp-pip.is-active {
+  color: var(--yp-accent);
+}
+
+.yp-pip svg {
+  width: 24px;
+  height: 24px;
+}
