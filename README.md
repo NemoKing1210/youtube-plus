@@ -69,7 +69,6 @@ npm install
 npm test             # node:test unit tests
 npm run build        # production bundle → dist/ + copied to the repo root
 npm run ci           # i18n check + build + artifact verification
-npm run harness      # mock YouTube page at http://localhost:5179
 ```
 
 Architecture and feature recipes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

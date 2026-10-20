@@ -95,5 +95,4 @@ npm run dev          # Vite serve — install the generated dev script (prefix "
 npm test             # node:test unit tests
 npm run build        # production bundle → dist/ + copied to the repo root
 npm run ci           # check:i18n + build + verify artifacts
-npm run harness      # mock YouTube page at http://localhost:5179 (run build first)
 ```

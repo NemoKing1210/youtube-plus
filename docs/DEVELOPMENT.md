@@ -16,37 +16,7 @@ npm run build        # dist/ + copies artifacts to the repository root
 npm run check:i18n   # missing / unused locale keys
 npm run verify:artifacts
 npm run ci           # check:i18n + build + verify:artifacts
-npm run harness      # mock YouTube page at http://localhost:5179 (build first)
 ```
-
-## Local harness
-
-`npm run build && npm run harness`, then open
-`http://localhost:5179/watch?v=mock1`.
-
-The harness serves a mock `ytd-app` with a guide, a watch layout, a Shorts
-shelf and a `#movie_player` that implements the player API surface. GM
-functions are shimmed on top of `localStorage`; the menu command buttons are
-rendered bottom-right.
-
-Query parameters:
-
-| Parameter | Effect |
-|---|---|
-| `?v=<id>` | video id returned by `getVideoData()` |
-| `?positions=<seconds>` | seeds a saved position for `?v` (or `mock1`) |
-| `?delay-meta=1` | duration stays `NaN` for 1.5 s, then metadata fires |
-| `?live=1` | `getDuration()` always returns `NaN`; the engine must not seek |
-| `?corrupt=1` | stores an invalid settings blob before boot |
-| `?late-guide=1` | removes the guide for 1.5 s, then inserts it |
-| `?theme=light` | renders the page in light mode |
-
-`/results` removes the player element before the script boots, so the
-no-player path is exercised there.
-
-The harness buttons (`watch`, `results`, `watch 2`) call `history.pushState`
-and dispatch `yt-navigate-finish` + `yt-page-data-updated`, mirroring
-YouTube's SPA contract.
 
 ## Debugging
 
@@ -84,8 +54,7 @@ Then paste the selector into `SEL` (`src/core/constants.js`) or the rule list
 ## Testing rules
 
 Unit tests cover pure logic (schema normalization, stylesheet generation,
-speed/quality/position math, search, i18n). DOM behavior is verified in the
-harness — see the smoke checklist in the implementation plan — and by one
+speed/quality/position math, search, i18n). DOM behavior is verified by one
 manual pass with the built script on `www.youtube.com`:
 
 1. The guide row appears once and opens the dialog.

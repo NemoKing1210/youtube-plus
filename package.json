@@ -24,8 +24,7 @@
     "check:i18n": "node scripts/check-i18n.mjs",
     "verify:artifacts": "node scripts/verify-artifacts.mjs",
     "ci": "npm run check:i18n && npm run build && npm run verify:artifacts",
-    "preview": "vite preview",
-    "harness": "node dev/harness/serve.mjs"
+    "preview": "vite preview"
   },
   "devDependencies": {
     "terser": "^5.49.0",

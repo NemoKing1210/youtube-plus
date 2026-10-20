@@ -19,5 +19,4 @@ All notable changes to this project are documented here. The format follows
   restore, a picture-in-picture button and `Alt+P` / `[` / `]` hotkeys.
 - Entry points: a YouTube Plus row in the left guide, a userscript-manager
   menu command and `Ctrl+M`.
-- Local harness with a mock YouTube page, GM shims and SPA navigation, plus
-  `node:test` unit tests for the pure modules.
+- `node:test` unit tests for the pure modules.
