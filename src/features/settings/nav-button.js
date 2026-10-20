@@ -1,6 +1,6 @@
 import { SCRIPT_NAME } from '../../core/constants.js';
 import { getFeatureSettings } from '../../core/settings.js';
-import { icon } from '../../ui/icons.js';
+import { iconNode } from '../../ui/icons.js';
 
 /**
  * Adds a "YouTube Plus" row to the left guide by cloning a native entry, so
@@ -41,8 +41,9 @@ function applyLabel(row) {
   if (labelNode) labelNode.textContent = SCRIPT_NAME;
   else anchor.append(document.createTextNode(SCRIPT_NAME));
 
-  const iconNode = anchor.querySelector('.icon, yt-icon, svg');
-  if (iconNode) iconNode.innerHTML = icon('settings', 24);
+  const iconNodeTarget = anchor.querySelector('.icon, yt-icon, svg');
+  const glyph = iconNode('settings', 24);
+  if (iconNodeTarget && glyph) iconNodeTarget.replaceChildren(glyph);
 
   const cfg = general();
   const hint = cfg.hotkey !== false && cfg.hotkeyHint !== false;

@@ -3,7 +3,7 @@ import { emit } from '../../core/bus.js';
 import { getFeatures } from '../../core/features.js';
 import { getDefaults, getSettings, saveSettings } from '../../core/settings.js';
 import { t } from '../../i18n/index.js';
-import { icon } from '../../ui/icons.js';
+import { iconNode } from '../../ui/icons.js';
 import { lockPageScroll, unlockPageScroll } from '../../ui/scroll-lock.js';
 import { showToast } from '../../ui/toast.js';
 import { el } from '../../utils/dom.js';
@@ -217,7 +217,7 @@ function buildSearch() {
   const row = el('div', 'yp-settings__search');
   const box = el('div', 'yp-search');
   const glyph = el('span', 'yp-search__icon');
-  glyph.innerHTML = icon('search');
+  glyph.append(iconNode('search'));
   const input = el('input', 'yp-search__input');
   input.type = 'text';
   input.autocomplete = 'off';
@@ -230,7 +230,7 @@ function buildSearch() {
   const clear = el('button', 'yp-search__clear');
   clear.type = 'button';
   clear.hidden = true;
-  clear.innerHTML = icon('close');
+  clear.append(iconNode('close'));
   clear.setAttribute('aria-label', t('panel.searchClear'));
   clear.title = t('panel.searchClear');
   box.append(glyph, input, clear);
@@ -305,10 +305,6 @@ function onKeyDown(event) {
 
   if (event.key === 'Escape') {
     event.stopPropagation();
-    if (state.search?.input.value) {
-      clearSearch();
-      return;
-    }
     closeSettings();
     return;
   }
@@ -362,7 +358,7 @@ function buildDialog(tabs, active) {
   close.dataset.ypClose = '';
   close.setAttribute('aria-label', t('common.close'));
   close.title = t('common.close');
-  close.innerHTML = icon('close');
+  close.append(iconNode('close'));
   const heading = el('div', 'yp-settings__heading');
   const title = el('h2', 'yp-settings__title', SCRIPT_NAME);
   title.id = 'yp-settings-title';

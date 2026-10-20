@@ -1,6 +1,6 @@
 import { SEL } from '../../core/constants.js';
 import { el } from '../../utils/dom.js';
-import { icon } from '../../ui/icons.js';
+import { iconNode } from '../../ui/icons.js';
 
 const BUTTON_CLASS = 'yp-pip';
 
@@ -18,15 +18,18 @@ export function ensurePipButton() {
   button.type = 'button';
   button.title = 'Picture-in-picture';
   button.setAttribute('aria-label', 'Picture-in-picture');
-  button.innerHTML = icon('pip');
+  button.append(iconNode('pip'));
   button.addEventListener('click', () => {
     const video = document.querySelector(SEL.video);
     if (video) togglePip(video);
   });
 
   const settingsButton = controls.querySelector('.ytp-settings-button');
-  if (settingsButton) controls.insertBefore(button, settingsButton);
-  else controls.append(button);
+  if (settingsButton?.parentElement) {
+    settingsButton.parentElement.insertBefore(button, settingsButton);
+  } else {
+    controls.append(button);
+  }
   syncButton();
 }
 

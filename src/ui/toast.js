@@ -2,8 +2,7 @@ import { UI_ATTR } from '../core/constants.js';
 import { getFeatureSettings } from '../core/settings.js';
 import { t } from '../i18n/index.js';
 import { el } from '../utils/dom.js';
-import { escapeAttr } from '../utils/html.js';
-import { icon } from './icons.js';
+import { iconNode } from './icons.js';
 
 const HOST_ID = 'yp-toast-host';
 
@@ -41,11 +40,15 @@ export function showToast(message, { type = 'info', title, duration, force = fal
   const host = ensureHost(config.toastPosition || 'top-right');
   const node = el('div', `yp-toast yp-toast--${type}`);
   node.setAttribute('role', type === 'error' ? 'alert' : 'status');
-  node.innerHTML = `<span class="yp-toast__icon">${icon(
-    type === 'success' ? 'check' : type,
-  )}</span><div class="yp-toast__body"><strong class="yp-toast__title">${escapeAttr(
-    title || t(`toast.title.${type}`),
-  )}</strong><p class="yp-toast__message">${escapeAttr(message)}</p></div>`;
+
+  const iconWrap = el('span', 'yp-toast__icon');
+  iconWrap.append(iconNode(type === 'success' ? 'check' : type));
+  const body = el('div', 'yp-toast__body');
+  body.append(
+    el('strong', 'yp-toast__title', title || t(`toast.title.${type}`)),
+    el('p', 'yp-toast__message', message),
+  );
+  node.append(iconWrap, body);
 
   let timer = 0;
   const dismiss = () => {
