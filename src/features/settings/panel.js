@@ -9,9 +9,10 @@ import { showToast } from '../../ui/toast.js';
 import { el } from '../../utils/dom.js';
 import { confirmDialog } from './confirm.js';
 import { renderTab } from './renderer.js';
+import { buildIndex, highlight, searchIndex, tokenize } from './search.js';
 
 /**
- * Settings dialog shell: header, scrollable tab strip, lazily rendered panels
+ * Settings dialog shell: header, search, tab strip, lazily rendered panels
  * and a Reset / Cancel / Save footer. Panels edit a *draft* copy of the
  * settings; nothing is persisted (or applied) until Save.
  */
@@ -75,6 +76,7 @@ function ensurePanel(tab) {
     onChange: updateBadges,
     onPreview: (ruleId) => emit('interface:preview', ruleId),
     rerender: rerenderAll,
+    reloadDraft,
   });
   panel.append(view.root);
   state.dialog.querySelector('.yp-settings__body').append(panel);
@@ -112,9 +114,163 @@ function rerenderAll() {
   updateBadges();
 }
 
+/** Replace the draft with the persisted settings (after an import). */
+function reloadDraft() {
+  if (!state) return;
+  state.draft = cloneSettings(getSettings());
+  rerenderAll();
+}
+
+/* ------------------------------------------------------------------ */
+/* Search                                                              */
+/* ------------------------------------------------------------------ */
+
+function setActiveResult(index, scroll = true) {
+  const { search } = state;
+  const items = [...search.results.querySelectorAll('.yp-hit')];
+  search.active = items.length ? Math.max(0, Math.min(items.length - 1, index)) : -1;
+  items.forEach((item, i) => {
+    const on = i === search.active;
+    item.classList.toggle('is-active', on);
+    item.setAttribute('aria-selected', on ? 'true' : 'false');
+    if (on) {
+      search.input.setAttribute('aria-activedescendant', item.id);
+      if (scroll) item.scrollIntoView({ block: 'nearest' });
+    }
+  });
+}
+
+function renderResults() {
+  if (!state?.search) return;
+  const { search } = state;
+  const query = search.input.value;
+  const tokens = tokenize(query);
+  search.clear.hidden = !query;
+  state.dialog.classList.toggle('is-searching', tokens.length > 0);
+  search.results.replaceChildren();
+  search.found = [];
+  search.active = -1;
+  if (!tokens.length) {
+    emit('interface:preview', null);
+    return;
+  }
+
+  search.index ??= buildIndex(state.tabs);
+  search.found = searchIndex(search.index, query);
+  if (!search.found.length) {
+    search.results.append(el('p', 'yp-hits__empty', t('panel.searchEmpty')));
+    return;
+  }
+  search.found.forEach((entry, i) => {
+    const item = el('button', 'yp-hit');
+    item.type = 'button';
+    item.id = `yp-hit-${i}`;
+    item.setAttribute('role', 'option');
+    item.tabIndex = -1;
+    const crumb = [entry.tabTitle, entry.sectionTitle]
+      .filter((part) => part && part !== entry.label)
+      .join(' › ');
+    const title = el('span', 'yp-hit__title');
+    title.append(highlight(entry.label, tokens));
+    item.append(title);
+    if (crumb) item.append(el('span', 'yp-hit__crumb', crumb));
+    if (entry.hint) {
+      const hint = el('span', 'yp-hit__hint');
+      hint.append(highlight(entry.hint, tokens));
+      item.append(hint);
+    }
+    item.addEventListener('mousemove', () => {
+      if (search.active !== i) setActiveResult(i, false);
+    });
+    item.addEventListener('click', () => jumpTo(entry));
+    search.results.append(item);
+  });
+  setActiveResult(0, false);
+}
+
+function clearSearch() {
+  if (!state?.search) return;
+  state.search.input.value = '';
+  renderResults();
+  emit('interface:preview', null);
+}
+
+/** Open the tab of a result, scroll to the setting and flash it. */
+function jumpTo(entry) {
+  clearSearch();
+  activateTab(entry.tabId);
+  if (entry.kind === 'tab') return;
+  const panel = state.rendered.get(entry.tabId)?.panel;
+  if (!panel) return;
+  const pick = (id) => panel.querySelector(`[data-yp-find="${CSS.escape(id)}"]`);
+  let node = pick(entry.id);
+  if (!node && entry.sectionId) node = pick(entry.sectionId);
+  if (!node || node.hidden) return;
+  node.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  node.classList.remove('is-found');
+  void node.offsetWidth;
+  node.classList.add('is-found');
+  node.addEventListener('animationend', () => node.classList.remove('is-found'), { once: true });
+}
+
+function buildSearch() {
+  const row = el('div', 'yp-settings__search');
+  const box = el('div', 'yp-search');
+  const glyph = el('span', 'yp-search__icon');
+  glyph.innerHTML = icon('search');
+  const input = el('input', 'yp-search__input');
+  input.type = 'text';
+  input.autocomplete = 'off';
+  input.spellcheck = false;
+  input.placeholder = `${t('panel.search')}  ( / )`;
+  input.setAttribute('role', 'combobox');
+  input.setAttribute('aria-label', t('panel.search'));
+  input.setAttribute('aria-expanded', 'true');
+  input.setAttribute('aria-controls', 'yp-settings-results');
+  const clear = el('button', 'yp-search__clear');
+  clear.type = 'button';
+  clear.hidden = true;
+  clear.innerHTML = icon('close');
+  clear.setAttribute('aria-label', t('panel.searchClear'));
+  clear.title = t('panel.searchClear');
+  box.append(glyph, input, clear);
+  row.append(box);
+
+  const results = el('div', 'yp-hits');
+  results.id = 'yp-settings-results';
+  results.setAttribute('role', 'listbox');
+  results.setAttribute('aria-label', t('panel.search'));
+
+  input.addEventListener('input', renderResults);
+  clear.addEventListener('click', () => {
+    clearSearch();
+    input.focus();
+  });
+  input.addEventListener('keydown', (event) => {
+    if (!state?.search) return;
+    if (event.key === 'ArrowDown') setActiveResult(state.search.active + 1);
+    else if (event.key === 'ArrowUp') setActiveResult(state.search.active - 1);
+    else if (event.key === 'Enter' && state.search.found[state.search.active]) {
+      jumpTo(state.search.found[state.search.active]);
+    } else return;
+    event.preventDefault();
+  });
+
+  return {
+    row,
+    results,
+    search: { input, clear, results, index: null, found: [], active: -1 },
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Actions                                                             */
+/* ------------------------------------------------------------------ */
+
 export function closeSettings() {
   if (!state) return;
   document.removeEventListener('keydown', onKeyDown, true);
+  emit('interface:preview', null);
   state.root.remove();
   state = null;
   unlockPageScroll();
@@ -133,8 +289,26 @@ function onKeyDown(event) {
   if (!state) return;
   if (document.querySelector('.yp-confirm-overlay')) return;
 
+  const typing =
+    event.target instanceof Element &&
+    event.target.closest('input, textarea, select, [contenteditable="true"]');
+  const shortcut =
+    (event.key === '/' && !typing && !event.ctrlKey && !event.metaKey && !event.altKey) ||
+    ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === 'k');
+  if (shortcut && state.search) {
+    event.preventDefault();
+    event.stopPropagation();
+    state.search.input.focus();
+    state.search.input.select();
+    return;
+  }
+
   if (event.key === 'Escape') {
     event.stopPropagation();
+    if (state.search?.input.value) {
+      clearSearch();
+      return;
+    }
     closeSettings();
     return;
   }
@@ -190,10 +364,12 @@ function buildDialog(tabs, active) {
   close.title = t('common.close');
   close.innerHTML = icon('close');
   const heading = el('div', 'yp-settings__heading');
-  heading.append(el('h2', 'yp-settings__title', SCRIPT_NAME));
-  heading.querySelector('.yp-settings__title').id = 'yp-settings-title';
-  heading.append(el('p', 'yp-settings__ver', `v${SCRIPT_VERSION}`));
+  const title = el('h2', 'yp-settings__title', SCRIPT_NAME);
+  title.id = 'yp-settings-title';
+  heading.append(title, el('p', 'yp-settings__ver', `v${SCRIPT_VERSION}`));
   header.append(close, heading);
+
+  const searchUi = buildSearch();
 
   const strip = el('div', 'yp-settings__tabs');
   strip.setAttribute('role', 'tablist');
@@ -201,6 +377,7 @@ function buildDialog(tabs, active) {
   for (const tab of tabs) strip.append(tabButton(tab, tab.id === active));
 
   const body = el('div', 'yp-settings__body');
+  body.append(searchUi.results);
 
   const actions = el('div', 'yp-settings__actions');
   const resetButton = el('button', 'yp-btn-ui yp-btn-ui--ghost yp-btn-ui--danger', t('common.reset'));
@@ -213,7 +390,7 @@ function buildDialog(tabs, active) {
   saveButton.addEventListener('click', save);
   actions.append(resetButton, spacer, cancelButton, saveButton);
 
-  dialog.append(header, strip, body, actions);
+  dialog.append(header, searchUi.row, strip, body, actions);
   root.append(dialog);
 
   root.addEventListener('click', (event) => {
@@ -241,7 +418,7 @@ function buildDialog(tabs, active) {
     buttons[next].focus();
   });
 
-  return { root, dialog };
+  return { root, dialog, search: searchUi.search };
 }
 
 /** Open the settings dialog (optionally on a given tab id). */
@@ -251,7 +428,7 @@ export function openSettings(tabId) {
   if (!tabs.length) return;
   const active = tabs.some((tab) => tab.id === tabId) ? tabId : tabs[0].id;
 
-  const { root, dialog } = buildDialog(tabs, active);
+  const { root, dialog, search } = buildDialog(tabs, active);
   state = {
     root,
     dialog,
@@ -259,6 +436,7 @@ export function openSettings(tabId) {
     tabs,
     active,
     rendered: new Map(),
+    search,
   };
 
   document.addEventListener('keydown', onKeyDown, true);
