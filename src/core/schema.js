@@ -77,7 +77,7 @@ export function normalizeFields(fields, raw) {
   return out;
 }
 
-/** Read a dotted path (`player.resume.enabled`) from an object. */
+/** Read a dotted path (`someNested.value`) from an object. */
 export function getPath(object, path) {
   let current = object;
   for (const part of String(path).split('.')) {

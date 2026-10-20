@@ -1,0 +1,15 @@
+[data-yp-ui] {
+  box-sizing: border-box;
+  font-family: var(--yp-font);
+}
+
+[data-yp-ui] *,
+[data-yp-ui] *::before,
+[data-yp-ui] *::after {
+  box-sizing: inherit;
+}
+
+[data-yp-ui]:focus-visible {
+  outline: 2px solid var(--yp-accent);
+  outline-offset: 2px;
+}

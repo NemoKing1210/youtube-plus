@@ -1,3 +1,6 @@
+import './styles/tokens.css';
+import './styles/base.css';
+
 import { emit, on } from './core/bus.js';
 import { ROOT_ATTR } from './core/constants.js';
 import { getFeatures, runFeatureHook, runHook } from './core/features.js';
@@ -11,6 +14,8 @@ import { whenReady } from './utils/dom.js';
  * these imports does not matter: execution order follows each feature's
  * `order`. To add a feature, create features/<name>/index.js and import it here.
  */
+
+import './features/general/index.js';
 
 function boot() {
   const root = document.documentElement;
