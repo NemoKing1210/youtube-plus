@@ -1,4 +1,5 @@
 import { SEL } from '../../core/constants.js';
+import { Codes, logError, logInfo } from '../../core/debug.js';
 import { ensurePipButton, removePipButton } from './pip.js';
 import { bindPlayerHotkeys, unbindPlayerHotkeys } from './hotkeys.js';
 import { qualityLevel } from './quality.js';
@@ -40,12 +41,18 @@ function applySpeed(player, video) {
   if (typeof player?.setPlaybackRate === 'function') player.setPlaybackRate(rate);
   else video.playbackRate = rate;
   state.speedApplied = true;
+  logInfo('player', 'speed applied', { videoId: state.videoId, rate });
 }
 
 function applyQuality(player) {
-  if (!cfg || cfg.quality === 'auto' || state.qualityTries > 0) return;
+  if (!cfg || cfg.quality === 'auto') {
+    clearTimeout(qualityTimer);
+    return;
+  }
+  if (state.qualityTries > 0) return;
   const level = qualityLevel(cfg.quality);
   if (!level) return;
+  const videoId = state.videoId;
   state.qualityTries = 1;
   try {
     player.setPlaybackQualityRange?.(level, level);
@@ -54,7 +61,14 @@ function applyQuality(player) {
   }
   clearTimeout(qualityTimer);
   qualityTimer = setTimeout(() => {
-    if (!cfg || state.qualityTries >= MAX_QUALITY_TRIES) return;
+    if (
+      !cfg ||
+      cfg.quality === 'auto' ||
+      state.videoId !== videoId ||
+      state.qualityTries >= MAX_QUALITY_TRIES
+    ) {
+      return;
+    }
     try {
       if (player.getPlaybackQuality?.() === level) return;
       state.qualityTries = MAX_QUALITY_TRIES;
@@ -67,13 +81,25 @@ function applyQuality(player) {
 
 function applyResume(player, video) {
   if (state.restoreAttempted) return;
+  const duration = Number(player?.getDuration?.() ?? video?.duration);
+  if (!Number.isFinite(duration)) return;
   state.restoreAttempted = true;
   if (!cfg?.resume) return;
-  restorePosition(player, video, state.videoId);
+  if (restorePosition(player, video, state.videoId)) {
+    logInfo('player', 'position restored', { videoId: state.videoId });
+  }
 }
 
 /** Apply every per-video preference exactly once. */
 export function applyForVideo() {
+  try {
+    applyCurrentVideo();
+  } catch (error) {
+    logError(Codes.PLAYER_APPLY, 'failed to apply player settings', { error });
+  }
+}
+
+function applyCurrentVideo() {
   if (!cfg || cfg.enabled === false) return;
   const player = playerEl();
   const video = videoEl();
@@ -85,6 +111,9 @@ export function applyForVideo() {
     state.videoId = id;
   }
   if (!id) return;
+
+  const duration = Number(player.getDuration?.() ?? video.duration);
+  if (video.readyState < 1 && !Number.isFinite(duration)) return;
 
   applySpeed(player, video);
   applyQuality(player);
@@ -111,10 +140,16 @@ function onEnded() {
   clearPosition(state.videoId);
 }
 
+function onSeeked() {
+  if (!cfg?.enabled || !cfg.resume || !boundVideo) return;
+  if (boundVideo.currentTime < 10) clearPosition(state.videoId);
+}
+
 function unbindVideo() {
   if (!boundVideo) return;
   boundVideo.removeEventListener('loadedmetadata', applyForVideo);
   boundVideo.removeEventListener('timeupdate', onTimeUpdate);
+  boundVideo.removeEventListener('seeked', onSeeked);
   boundVideo.removeEventListener('ended', onEnded);
   boundVideo = null;
 }
@@ -125,10 +160,12 @@ function bindVideo(video) {
   boundVideo = video;
   video.addEventListener('loadedmetadata', applyForVideo);
   video.addEventListener('timeupdate', onTimeUpdate);
+  video.addEventListener('seeked', onSeeked);
   video.addEventListener('ended', onEnded);
 }
 
 export function resetPlayerState() {
+  clearTimeout(qualityTimer);
   state = freshState();
   lastSave = 0;
 }

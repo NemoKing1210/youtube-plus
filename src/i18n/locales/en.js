@@ -42,7 +42,7 @@ export default {
   'interface.title': 'Interface',
   'interface.section': 'Clean-up',
   'interface.enabled': 'Hide selected elements',
-  'interface.hint': 'Hiding is instant and reversible; save to keep it.',
+  'interface.hint': 'Changes apply when you save.',
   'interface.group.feed': 'Feeds',
   'interface.group.nav': 'Navigation',
   'interface.group.watch': 'Watch page',

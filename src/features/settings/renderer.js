@@ -129,6 +129,7 @@ export function renderTab(tab, ctx) {
 
   for (const sectionSpec of tab.sections || []) {
     const box = el('section', 'yp-section');
+    box.dataset.ypFind = `${tab.id}:${sectionSpec.titleKey ?? ''}`;
     if (sectionSpec.titleKey) {
       box.append(el('h3', 'yp-section__title', t(sectionSpec.titleKey)));
     }

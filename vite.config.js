@@ -57,6 +57,13 @@ export default defineConfig({
       build: {
         fileName: 'youtube-plus.user.js',
         metaFileName: true,
+        // The default injector references GM_addStyle, which would add a
+        // fourth grant; build the style node instead.
+        cssSideEffects: () => (css) => {
+          const style = document.createElement('style');
+          style.textContent = css;
+          (document.head || document.documentElement).append(style);
+        },
       },
     }),
   ],

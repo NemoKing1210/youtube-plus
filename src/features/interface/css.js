@@ -16,10 +16,11 @@ export function buildInterfaceCss(rules, cfg, { hoveredId = null } = {}) {
   let previewSelectors = [];
 
   for (const rule of rules) {
-    if (cfg[rule.group]?.[rule.key] !== true) continue;
+    const isHovered = ruleId(rule) === hoveredId;
+    if (!isHovered && cfg[rule.group]?.[rule.key] !== true) continue;
     const selectors = rule.css ? (Array.isArray(rule.css) ? rule.css : [rule.css]) : [];
     if (!selectors.length) continue;
-    if (ruleId(rule) === hoveredId) {
+    if (isHovered) {
       previewSelectors = selectors;
       continue;
     }

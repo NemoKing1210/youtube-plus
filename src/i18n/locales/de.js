@@ -42,7 +42,7 @@ export default {
   'interface.title': 'Oberfläche',
   'interface.section': 'Aufräumen',
   'interface.enabled': 'Ausgewählte Elemente ausblenden',
-  'interface.hint': 'Ausblenden wirkt sofort und ist umkehrbar; speichere, um es zu behalten.',
+  'interface.hint': 'Änderungen werden beim Speichern angewendet.',
   'interface.group.feed': 'Feeds',
   'interface.group.nav': 'Navigation',
   'interface.group.watch': 'Wiedergabeseite',

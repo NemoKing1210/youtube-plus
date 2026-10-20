@@ -48,7 +48,7 @@ registerFeature({
               type: 'select',
               path: 'language',
               labelKey: 'general.language',
-              options: languageOptions(),
+              options: () => languageOptions(),
             },
             {
               type: 'switch',

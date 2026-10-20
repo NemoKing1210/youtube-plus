@@ -42,7 +42,7 @@ export default {
   'interface.title': 'インターフェース',
   'interface.section': '整理',
   'interface.enabled': '選択した要素を非表示',
-  'interface.hint': '非表示はすぐに反映され、元に戻せます。保存すると維持されます。',
+  'interface.hint': '変更は保存後に適用されます。',
   'interface.group.feed': 'フィード',
   'interface.group.nav': 'ナビゲーション',
   'interface.group.watch': '視聴ページ',

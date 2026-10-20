@@ -16,8 +16,6 @@ export const Codes = {
   SETTINGS_IMPORT: 'YP-1003',
   /** A feature hook (init/apply/scan/navigate) threw. */
   FEATURE_HOOK: 'YP-1010',
-  /** A navigation hook threw. */
-  NAVIGATION_HOOK: 'YP-1020',
   /** An interface rule threw while previewing or applying. */
   INTERFACE_RULE: 'YP-1101',
   /** The player feature failed to apply its settings. */

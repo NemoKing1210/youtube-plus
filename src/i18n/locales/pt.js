@@ -42,7 +42,7 @@ export default {
   'interface.title': 'Interface',
   'interface.section': 'Limpeza',
   'interface.enabled': 'Ocultar os elementos selecionados',
-  'interface.hint': 'Ocultar é instantâneo e reversível; salve para manter.',
+  'interface.hint': 'As alterações são aplicadas ao salvar.',
   'interface.group.feed': 'Feeds',
   'interface.group.nav': 'Navegação',
   'interface.group.watch': 'Página de reprodução',

@@ -35,3 +35,14 @@ test('a previewed rule is excluded and its selectors returned', () => {
     'ytd-rich-shelf-renderer[is-shorts]',
   ]);
 });
+
+test('a previewed rule is returned even when it is off', () => {
+  const id = ruleId({ group: 'watch', key: 'comments' });
+  const { css, previewSelectors } = buildInterfaceCss(
+    RULES,
+    config({ feed: { shorts: false }, nav: { shorts: false, premium: false } }),
+    { hoveredId: id },
+  );
+  assert.equal(css, '');
+  assert.deepEqual(previewSelectors, ['ytd-comments#comments']);
+});

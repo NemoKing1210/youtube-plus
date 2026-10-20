@@ -33,11 +33,16 @@ Query parameters:
 
 | Parameter | Effect |
 |---|---|
-| `?v=<id>` | video id returned by `getVideoData()`; also seeds the position map |
-| `?live=1` | `getDuration()` returns `NaN`; the engine must not seek |
+| `?v=<id>` | video id returned by `getVideoData()` |
+| `?positions=<seconds>` | seeds a saved position for `?v` (or `mock1`) |
+| `?delay-meta=1` | duration stays `NaN` for 1.5 s, then metadata fires |
+| `?live=1` | `getDuration()` always returns `NaN`; the engine must not seek |
 | `?corrupt=1` | stores an invalid settings blob before boot |
 | `?late-guide=1` | removes the guide for 1.5 s, then inserts it |
 | `?theme=light` | renders the page in light mode |
+
+`/results` removes the player element before the script boots, so the
+no-player path is exercised there.
 
 The harness buttons (`watch`, `results`, `watch 2`) call `history.pushState`
 and dispatch `yt-navigate-finish` + `yt-page-data-updated`, mirroring

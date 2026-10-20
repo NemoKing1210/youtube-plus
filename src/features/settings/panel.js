@@ -22,6 +22,7 @@ const ROOT_ID = 'yp-settings-root';
 const cloneSettings = (settings) => JSON.parse(JSON.stringify(settings));
 
 let state = null;
+let previousFocus = null;
 
 /** Tabs contributed by every registered feature, in feature order. */
 function collectTabs() {
@@ -203,9 +204,15 @@ function jumpTo(entry) {
   const panel = state.rendered.get(entry.tabId)?.panel;
   if (!panel) return;
   const pick = (id) => panel.querySelector(`[data-yp-find="${CSS.escape(id)}"]`);
+  const visible = (node) => {
+    for (let current = node; current && current !== panel; current = current.parentElement) {
+      if (current.hidden) return false;
+    }
+    return true;
+  };
   let node = pick(entry.id);
-  if (!node && entry.sectionId) node = pick(entry.sectionId);
-  if (!node || node.hidden) return;
+  if (!node || !visible(node)) node = entry.sectionId ? pick(entry.sectionId) : null;
+  if (!node || !visible(node)) return;
   node.scrollIntoView({ block: 'center', behavior: 'smooth' });
   node.classList.remove('is-found');
   void node.offsetWidth;
@@ -274,6 +281,8 @@ export function closeSettings() {
   state.root.remove();
   state = null;
   unlockPageScroll();
+  if (previousFocus?.isConnected) previousFocus.focus?.();
+  previousFocus = null;
 }
 
 function focusables() {
@@ -348,6 +357,7 @@ function buildDialog(tabs, active) {
   root.id = ROOT_ID;
 
   const dialog = el('div', 'yp-settings');
+  dialog.tabIndex = -1;
   dialog.setAttribute('role', 'dialog');
   dialog.setAttribute('aria-modal', 'true');
   dialog.setAttribute('aria-labelledby', 'yp-settings-title');
@@ -436,9 +446,11 @@ export function openSettings(tabId) {
   };
 
   document.addEventListener('keydown', onKeyDown, true);
+  previousFocus = document.activeElement;
   (document.body || document.documentElement).append(root);
   lockPageScroll();
   activateTab(active);
+  dialog.focus();
   requestAnimationFrame(updateBadges);
 }
 

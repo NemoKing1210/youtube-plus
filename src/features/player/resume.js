@@ -1,6 +1,13 @@
 import { POSITIONS_KEY } from '../../core/constants.js';
+import { Codes, logError } from '../../core/debug.js';
 import { getValue, setValue } from '../../core/storage.js';
 import { prunePositions, shouldRestore } from './positions.js';
+
+function persist(map) {
+  if (!setValue(POSITIONS_KEY, map)) {
+    logError(Codes.PLAYER_POSITIONS, 'failed to persist video positions');
+  }
+}
 
 export function loadPositions() {
   return prunePositions(getValue(POSITIONS_KEY, {}));
@@ -10,7 +17,7 @@ export function savePosition(videoId, seconds) {
   if (!videoId || !Number.isFinite(seconds) || seconds < 10) return;
   const map = loadPositions();
   map[videoId] = { t: Math.round(seconds), at: Date.now() };
-  setValue(POSITIONS_KEY, prunePositions(map));
+  persist(prunePositions(map));
 }
 
 export function readPosition(videoId) {
@@ -22,7 +29,7 @@ export function clearPosition(videoId) {
   const map = loadPositions();
   if (!(videoId in map)) return;
   delete map[videoId];
-  setValue(POSITIONS_KEY, map);
+  persist(map);
 }
 
 /** Seek once to the stored position. Returns whether a seek happened. */

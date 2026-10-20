@@ -1,4 +1,5 @@
 import { SEL } from '../../core/constants.js';
+import { t } from '../../i18n/index.js';
 import { el } from '../../utils/dom.js';
 import { iconNode } from '../../ui/icons.js';
 
@@ -16,8 +17,9 @@ export function ensurePipButton() {
 
   const button = el('button', `${BUTTON_CLASS} ytp-button`);
   button.type = 'button';
-  button.title = 'Picture-in-picture';
-  button.setAttribute('aria-label', 'Picture-in-picture');
+  const label = t('player.pip');
+  button.title = label;
+  button.setAttribute('aria-label', label);
   button.append(iconNode('pip'));
   button.addEventListener('click', () => {
     const video = document.querySelector(SEL.video);

@@ -184,7 +184,6 @@ harmless there; JS `find` passes are scoped to the active `#page-manager`.
 | `YP-1002` | settings persist failed |
 | `YP-1003` | settings import failed |
 | `YP-1010` | feature hook threw |
-| `YP-1020` | navigation hook threw |
 | `YP-1101` | interface rule threw while previewing |
 | `YP-1201` | player apply failed |
 | `YP-1202` | position storage failed |

@@ -17,8 +17,8 @@ export function matches(text, tokens) {
 function controlText(control) {
   const label = control.labelKey ? t(control.labelKey) : control.textKey ? t(control.textKey) : '';
   const hint = control.hintKey ? t(control.hintKey) : '';
-  const options = (control.options || []).map((option) => option.label ?? t(option.labelKey));
-  return { label, hint, text: [label, hint, ...options].join(' ') };
+  const options = typeof control.options === 'function' ? control.options() : control.options || [];
+  return { label, hint, text: [label, hint, ...options.map((option) => option.label ?? t(option.labelKey))].join(' ') };
 }
 
 /**
@@ -44,7 +44,7 @@ export function buildIndex(tabs) {
     }
     for (const section of tab.sections) {
       const sectionTitle = section.titleKey ? t(section.titleKey) : '';
-      const sectionId = `${tab.id}:${section.titleKey ?? index.length}`;
+      const sectionId = `${tab.id}:${section.titleKey ?? ''}`;
       for (const control of section.controls || []) {
         const { label, hint, text } = controlText(control);
         if (!label) continue;

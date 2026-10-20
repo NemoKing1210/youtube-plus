@@ -42,7 +42,7 @@ export default {
   'interface.title': 'Интерфейс',
   'interface.section': 'Чистка',
   'interface.enabled': 'Скрывать выбранные элементы',
-  'interface.hint': 'Скрытие действует сразу и обратимо; сохраните настройки, чтобы оставить.',
+  'interface.hint': 'Изменения применяются после сохранения.',
   'interface.group.feed': 'Ленты',
   'interface.group.nav': 'Навигация',
   'interface.group.watch': 'Страница просмотра',

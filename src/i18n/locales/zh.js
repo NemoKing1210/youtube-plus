@@ -42,7 +42,7 @@ export default {
   'interface.title': '界面',
   'interface.section': '清理',
   'interface.enabled': '隐藏选定元素',
-  'interface.hint': '隐藏立即生效且可撤销；保存后保留设置。',
+  'interface.hint': '保存后生效。',
   'interface.group.feed': '信息流',
   'interface.group.nav': '导航',
   'interface.group.watch': '观看页',

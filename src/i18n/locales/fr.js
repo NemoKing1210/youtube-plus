@@ -42,7 +42,7 @@ export default {
   'interface.title': 'Interface',
   'interface.section': 'Nettoyage',
   'interface.enabled': 'Masquer les éléments sélectionnés',
-  'interface.hint': 'Le masquage est immédiat et réversible ; enregistrez pour le conserver.',
+  'interface.hint': 'Les modifications s’appliquent à l’enregistrement.',
   'interface.group.feed': 'Fils',
   'interface.group.nav': 'Navigation',
   'interface.group.watch': 'Page de lecture',

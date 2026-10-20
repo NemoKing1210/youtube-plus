@@ -25,7 +25,6 @@
 // @tag                userscript
 // @tag                cleanup
 // @tag                player
-// @grant              GM_addStyle
 // @grant              GM_getValue
 // @grant              GM_registerMenuCommand
 // @grant              GM_setValue
