@@ -1,5 +1,6 @@
 import './styles/tokens.css';
 import './styles/base.css';
+import './styles/settings.css';
 
 import { emit, on } from './core/bus.js';
 import { ROOT_ATTR } from './core/constants.js';
@@ -16,6 +17,7 @@ import { whenReady } from './utils/dom.js';
  */
 
 import './features/general/index.js';
+import './features/settings/index.js';
 
 function boot() {
   const root = document.documentElement;
