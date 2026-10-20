@@ -1,10 +1,39 @@
+import { emit, on } from './core/bus.js';
 import { ROOT_ATTR } from './core/constants.js';
+import { getFeatures, runFeatureHook, runHook } from './core/features.js';
+import { startNavigationWatch, startScanning, scanNow } from './core/scan.js';
+import { getFeatureSettings, loadSettings } from './core/settings.js';
+import { observeTheme } from './core/theme.js';
 import { whenReady } from './utils/dom.js';
+
+/*
+ * Feature modules register themselves on import (core/features.js). Order of
+ * these imports does not matter: execution order follows each feature's
+ * `order`. To add a feature, create features/<name>/index.js and import it here.
+ */
 
 function boot() {
   const root = document.documentElement;
   if (root.hasAttribute(ROOT_ATTR)) return;
   root.setAttribute(ROOT_ATTR, '1');
+
+  loadSettings();
+  observeTheme((theme) => emit('theme', theme));
+
+  // Feature by feature: one-time init, then the initial apply. `general`
+  // (order 0) therefore configures the UI language before anything renders.
+  for (const feature of getFeatures()) {
+    runFeatureHook(feature.id, 'init');
+    runFeatureHook(feature.id, 'apply', getFeatureSettings(feature.id), null);
+    on(`settings:${feature.id}`, (cfg, prev) => runFeatureHook(feature.id, 'apply', cfg, prev));
+  }
+
+  on('scan', (rootNode) => runHook('scan', rootNode));
+  on('navigate', (url) => runHook('navigate', url));
+
+  startScanning();
+  startNavigationWatch();
+  scanNow();
 }
 
 whenReady(boot);
