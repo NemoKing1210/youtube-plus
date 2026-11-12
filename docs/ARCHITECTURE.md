@@ -181,8 +181,9 @@ instead. For a `find` rule the preview marks matches with
 `data-yp-preview~="<id>"` and outlines those. Scanning is scoped to the active
 `#page-manager` so mark passes never touch previously visited pages.
 
-Custom selectors are stored as `custom.selectors`, a `list` of 300-character
-`string` fields capped at 50 entries. `custom.js` has the authoritative
+Custom selectors are stored as `custom.selectors`, a `list` capped at 50
+entries; each `string` item's schema `maxLength` is 1000 (a storage guard, so
+over-long lines reach the sanitizer intact). `custom.js` has the authoritative
 limits: an entry is rejected when it is empty, longer than 300 characters, or
 contains `{`, `}`, `;`, `@`, a newline, a backslash or a CSS comment delimiter
 (`/*`, `*/`); duplicates are dropped. `css.js` sanitizes again before
@@ -222,7 +223,9 @@ unbinds hotkeys, and resets `playbackRate = 1` and `loop = false`.
 
 ## Verified selectors and platform facts
 
-Checked against live `www.youtube.com` when this version was written:
+Confirmed against the source and the local harness for this version; no live
+`www.youtube.com` pass was performed. Live confirmation remains a manual step
+(see [DEVELOPMENT.md](DEVELOPMENT.md#verifying-a-selector-against-live-youtube)):
 
 | Fact | Selector / API |
 |---|---|

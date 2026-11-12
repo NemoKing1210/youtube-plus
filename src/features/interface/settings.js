@@ -15,7 +15,10 @@ export function interfaceFields(rules = RULES) {
   }
   fields.custom = field.record({
     enabled: field.bool(false),
-    selectors: field.list(field.string('', { maxLength: 300 }), { maxItems: 50 }),
+    // Storage guard only. Keep over-long lines intact so the sanitizer can
+    // reject them (> MAX_SELECTOR_LENGTH) instead of truncating them into a
+    // shorter selector that might match unintended elements.
+    selectors: field.list(field.string('', { maxLength: 1000 }), { maxItems: 50 }),
   });
   return fields;
 }

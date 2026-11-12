@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { sanitizeSelector, sanitizeSelectors } from '../src/features/interface/custom.js';
 import { buildInterfaceCss } from '../src/features/interface/css.js';
+import { interfaceFields } from '../src/features/interface/settings.js';
+import { normalizeFields } from '../src/core/schema.js';
 
 test('sanitizeSelector accepts normal selectors', () => {
   assert.equal(
@@ -41,6 +43,19 @@ test('sanitizeSelectors dedupes, caps and preserves order', () => {
   assert.equal(out.length, 50);
   assert.equal(out[0], '.c0');
   assert.equal(out[49], '.c49');
+});
+
+test('over-long selectors survive normalization and are dropped by the sanitizer', () => {
+  const overLong = 'x'.repeat(301);
+  const normalized = normalizeFields(interfaceFields(), {
+    custom: { enabled: true, selectors: [overLong] },
+  });
+  // The schema cap (1000) is a storage guard: it must not truncate the line
+  // into a shorter selector that could match unintended elements.
+  assert.equal(normalized.custom.selectors.length, 1);
+  assert.equal(normalized.custom.selectors[0].length, 301);
+  // The sanitizer enforces the real 300-character limit.
+  assert.deepEqual(sanitizeSelectors(normalized.custom.selectors), []);
 });
 
 test('custom selectors produce a hiding rule', () => {
