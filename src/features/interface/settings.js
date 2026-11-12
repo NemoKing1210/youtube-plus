@@ -38,7 +38,11 @@ export function interfaceTab(rules = RULES) {
         type: 'switch',
         path: `${group}.${rule.key}`,
         labelKey: ruleLabelKey(rule),
-        hintKey: rule.hint ? `${ruleLabelKey(rule)}Hint` : undefined,
+        hintKey: rule.hint
+          ? `${ruleLabelKey(rule)}Hint`
+          : rule.experimental
+            ? 'interface.experimentalHint'
+            : undefined,
         ruleId: `${group}.${rule.key}`,
       })),
     });

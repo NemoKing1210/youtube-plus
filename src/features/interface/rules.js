@@ -10,15 +10,16 @@
  * (`interface.rule.<group>.<key>` plus `<…>Hint` when `hint` is set).
  *
  * @typedef {object} Rule
- * @property {'feed'|'nav'|'watch'|'chrome'} group
+ * @property {'nav'|'feed'|'subscriptions'|'search'|'watch'|'channel'|'chrome'} group
  * @property {string} key
  * @property {boolean} [on]      - enabled by default
  * @property {boolean} [hint]    - has a `<label>Hint` locale string
+ * @property {boolean} [experimental] - off by default; hint falls back to `interface.experimentalHint`
  * @property {string[]} [css]
  * @property {(root: ParentNode) => Element[]} [find]
  */
 
-export const GROUPS = ['feed', 'nav', 'watch', 'chrome'];
+export const GROUPS = ['nav', 'feed', 'subscriptions', 'search', 'watch', 'channel', 'chrome'];
 
 export const RULES = [
   {
