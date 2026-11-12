@@ -1,5 +1,6 @@
 import { Codes, logError } from '../../core/debug.js';
 import { SEL } from '../../core/constants.js';
+import { ensureStyle } from '../../utils/style.js';
 import { buildInterfaceCss } from './css.js';
 import { RULES, ruleId } from './rules.js';
 
@@ -11,86 +12,115 @@ import { RULES, ruleId } from './rules.js';
 
 const STYLE_ID = 'yp-interface-style';
 const PREVIEW_ID = 'yp-interface-preview';
-const MARK_ATTR = 'data-yp-hide';
+const OUTLINE = 'outline:2px solid var(--yp-accent)!important;outline-offset:-2px!important';
 const PAGE_INTERVAL_MS = 120;
+
+export const MARK_ATTR = 'data-yp-hide';
+export const PREVIEW_ATTR = 'data-yp-preview';
 
 let config = null;
 let hoveredId = null;
 let pageTimer = 0;
 
-function style(id) {
-  let node = document.getElementById(id);
-  if (!node) {
-    node = document.createElement('style');
-    node.id = id;
-    (document.head || document.documentElement).append(node);
+/** Add the rule id to a space-separated id list, preserving other marks. */
+function addMark(node, attr, id) {
+  const marks = new Set((node.getAttribute(attr) || '').split(/\s+/).filter(Boolean));
+  if (marks.has(id)) return;
+  marks.add(id);
+  node.setAttribute(attr, [...marks].join(' '));
+}
+
+/** Remove one rule id, keeping the element's other marks. */
+function removeMark(node, attr, id) {
+  const marks = (node.getAttribute(attr) || '')
+    .split(/\s+/)
+    .filter((value) => value && value !== id);
+  if (marks.length) node.setAttribute(attr, marks.join(' '));
+  else node.removeAttribute(attr);
+}
+
+/**
+ * Make the elements carrying `attr~="<id>"` exactly match `matches`: mark the
+ * new matches and remove the id from elements that no longer match. Other
+ * rule ids in the same attribute are untouched.
+ *
+ * @param {ParentNode} root
+ * @param {string} attr
+ * @param {string} id
+ * @param {Iterable<Element>} matches
+ * @returns {Set<Element>}
+ */
+export function syncMarks(root, attr, id, matches) {
+  const wanted = matches instanceof Set ? matches : new Set(matches || []);
+  for (const node of wanted) addMark(node, attr, id);
+  for (const node of root.querySelectorAll(`[${attr}~="${id}"]`)) {
+    if (!wanted.has(node)) removeMark(node, attr, id);
   }
-  return node;
+  return wanted;
 }
 
 function render() {
   if (!config) return;
   const { css, previewSelectors } = buildInterfaceCss(RULES, config, { hoveredId });
-  style(STYLE_ID).textContent = css;
-  style(PREVIEW_ID).textContent = previewSelectors
-    .map(
-      (selector) =>
-        `${selector}{outline:2px solid var(--yp-accent)!important;outline-offset:-2px!important}`,
-    )
-    .join('\n');
+  ensureStyle(STYLE_ID).textContent = css;
+
+  const strokes = previewSelectors.map((selector) => `${selector}{${OUTLINE}}`);
+  const hoveredFind = RULES.find(
+    (rule) => typeof rule.find === 'function' && ruleId(rule) === hoveredId,
+  );
+  if (hoveredFind) strokes.push(`[${PREVIEW_ATTR}~="${hoveredId}"]{${OUTLINE}}`);
+  ensureStyle(PREVIEW_ID).textContent = strokes.join('\n');
 }
 
 export function applyInterface(cfg) {
   config = cfg;
   render();
+  runFind(document);
 }
 
 export function previewRule(id) {
   if (hoveredId === id) return;
   hoveredId = id;
   render();
+  runFind(document);
 }
 
 function isOn(rule) {
   return config?.enabled === true && config[rule.group]?.[rule.key] === true;
 }
 
-function mark(rule, root) {
-  const id = ruleId(rule);
-  const enabled = isOn(rule);
-  if (enabled) {
-    let nodes = [];
-    try {
-      nodes = rule.find(root) || [];
-    } catch (error) {
-      logError(Codes.INTERFACE_RULE, `rule "${id}" failed`, { error });
-    }
-    for (const node of nodes) {
-      const marks = new Set((node.getAttribute(MARK_ATTR) || '').split(/\s+/).filter(Boolean));
-      marks.add(id);
-      node.setAttribute(MARK_ATTR, [...marks].join(' '));
-    }
-    return;
+function safeFind(rule, root) {
+  try {
+    return rule.find(root) || [];
+  } catch (error) {
+    logError(Codes.INTERFACE_RULE, `rule "${ruleId(rule)}" failed`, { error });
+    return [];
   }
-  for (const node of document.querySelectorAll(`[${MARK_ATTR}~="${id}"]`)) {
-    const marks = (node.getAttribute(MARK_ATTR) || '')
-      .split(/\s+/)
-      .filter((value) => value && value !== id);
-    if (marks.length) node.setAttribute(MARK_ATTR, marks.join(' '));
-    else node.removeAttribute(MARK_ATTR);
+}
+
+function mark(rule, root, preview) {
+  const id = ruleId(rule);
+  const matches = isOn(rule) || preview ? safeFind(rule, root) : [];
+  if (preview) {
+    syncMarks(root, MARK_ATTR, id, []);
+    syncMarks(root, PREVIEW_ATTR, id, matches);
+  } else {
+    syncMarks(root, PREVIEW_ATTR, id, []);
+    syncMarks(root, MARK_ATTR, id, isOn(rule) ? matches : []);
   }
 }
 
 /**
- * Page-level pass for `find` rules. Throttled so YouTube's DOM churn cannot
- * starve it; scoped to the active page manager.
+ * Page-level pass for `find` rules. Every rule is visited so stale marks are
+ * cleared. Throttled so YouTube's DOM churn cannot starve it; scoped to the
+ * active page manager.
  */
 export function runFind(root = document) {
   if (!config) return;
   const findRules = RULES.filter((rule) => typeof rule.find === 'function');
   if (!findRules.length) return;
   const scope = root.querySelector?.(SEL.pageManager) || root;
-  for (const rule of findRules) mark(rule, scope);
+  for (const rule of findRules) mark(rule, scope, ruleId(rule) === hoveredId);
 }
 
 export function scheduleFind() {

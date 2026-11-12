@@ -61,6 +61,7 @@ export default defineConfig({
         // fourth grant; build the style node instead.
         cssSideEffects: () => (css) => {
           const style = document.createElement('style');
+          style.setAttribute('data-yp-ui', '');
           style.textContent = css;
           (document.head || document.documentElement).append(style);
         },
