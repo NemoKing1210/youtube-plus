@@ -25,6 +25,11 @@ test('computeColumns resolves each page independently', () => {
   );
 });
 
+test('computeColumns falls back to the minimum on an unmeasured page', () => {
+  const cfg = { grid: { home: 'auto', subscriptions: 'auto', channel: 'auto', targetWidth: 320, itemGap: 8 } };
+  assert.deepEqual(computeColumns(cfg, { home: 0, subscriptions: 0, channel: 0 }), { home: 2, subscriptions: 2, channel: 2 });
+});
+
 test('buildLayoutCss scopes columns to each page', () => {
   const cfg = { grid: { home: 'auto', subscriptions: '4', channel: 'auto', targetWidth: 320, itemGap: 8, gutter: 16 }, compact: {} };
   const css = buildLayoutCss(cfg, { home: 5, subscriptions: 4, channel: 3 });

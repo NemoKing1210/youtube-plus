@@ -20,6 +20,7 @@ import { whenReady } from './utils/dom.js';
 
 import './features/general/index.js';
 import './features/interface/index.js';
+import './features/layout/index.js';
 import './features/player/index.js';
 import './features/settings/index.js';
 

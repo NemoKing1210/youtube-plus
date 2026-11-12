@@ -22,6 +22,8 @@ export const Codes = {
   PLAYER_APPLY: 'YP-1201',
   /** Reading or writing saved video positions failed. */
   PLAYER_POSITIONS: 'YP-1202',
+  /** The layout feature failed to apply its settings. */
+  LAYOUT_APPLY: 'YP-1301',
 };
 
 const BADGE_STYLE =
