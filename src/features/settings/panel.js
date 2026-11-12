@@ -6,6 +6,7 @@ import { t } from '../../i18n/index.js';
 import { iconNode } from '../../ui/icons.js';
 import { lockPageScroll, unlockPageScroll } from '../../ui/scroll-lock.js';
 import { showToast } from '../../ui/toast.js';
+import { attachRipple } from '../../ui/ripple.js';
 import { el } from '../../utils/dom.js';
 import { confirmDialog } from './confirm.js';
 import { renderTab } from './renderer.js';
@@ -44,6 +45,12 @@ function tabButton(tab, active) {
   button.setAttribute('aria-selected', active ? 'true' : 'false');
   button.setAttribute('aria-controls', `yp-panel-${tab.id}`);
   button.tabIndex = active ? 0 : -1;
+  const icon = tab.icon ? iconNode(tab.icon, 18) : null;
+  if (icon) {
+    const glyph = el('span', 'yp-settings__tab-icon');
+    glyph.append(icon);
+    button.append(glyph);
+  }
   button.append(el('span', 'yp-settings__tab-label', t(tab.titleKey)));
   if (tab.badge) button.append(el('span', 'yp-settings__badge'));
   return button;
@@ -104,6 +111,8 @@ function activateTab(tabId) {
     entry.panel.classList.toggle('is-active', on);
     entry.panel.hidden = !on;
   }
+  const activeButton = state.dialog.querySelector(`[data-yp-tab="${CSS.escape(tabId)}"]`);
+  activeButton?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   state.dialog.querySelector('.yp-settings__body').scrollTop = 0;
 }
 
@@ -274,15 +283,31 @@ function buildSearch() {
 /* Actions                                                             */
 /* ------------------------------------------------------------------ */
 
-export function closeSettings() {
+function teardown() {
   if (!state) return;
+  const root = state.root;
+  clearTimeout(state.closeTimer);
   document.removeEventListener('keydown', onKeyDown, true);
   emit('interface:preview', null);
-  state.root.remove();
+  root.remove();
   state = null;
   unlockPageScroll();
   if (previousFocus?.isConnected) previousFocus.focus?.();
   previousFocus = null;
+}
+
+export function closeSettings() {
+  if (!state || state.closing) return;
+  state.closing = true;
+  const root = state.root;
+  root.classList.add('is-closing');
+  const finish = (event) => {
+    if (event && event.target !== root) return;
+    root.removeEventListener('animationend', finish);
+    teardown();
+  };
+  root.addEventListener('animationend', finish);
+  state.closeTimer = setTimeout(finish, 200);
 }
 
 function focusables() {
@@ -373,9 +398,9 @@ function buildDialog(tabs, active) {
   const title = el('h2', 'yp-settings__title', SCRIPT_NAME);
   title.id = 'yp-settings-title';
   heading.append(title, el('p', 'yp-settings__ver', `v${SCRIPT_VERSION}`));
-  header.append(close, heading);
 
   const searchUi = buildSearch();
+  header.append(heading, searchUi.row, close);
 
   const strip = el('div', 'yp-settings__tabs');
   strip.setAttribute('role', 'tablist');
@@ -386,17 +411,20 @@ function buildDialog(tabs, active) {
   body.append(searchUi.results);
 
   const actions = el('div', 'yp-settings__actions');
-  const resetButton = el('button', 'yp-btn-ui yp-btn-ui--ghost yp-btn-ui--danger', t('common.reset'));
+  const resetButton = el('button', 'yp-btn-ui yp-btn-ui--text yp-btn-ui--danger', t('common.reset'));
   const spacer = el('span', 'yp-settings__spacer');
-  const cancelButton = el('button', 'yp-btn-ui yp-btn-ui--ghost', t('common.cancel'));
+  const cancelButton = el('button', 'yp-btn-ui yp-btn-ui--tonal', t('common.cancel'));
   const saveButton = el('button', 'yp-btn-ui yp-btn-ui--primary', t('common.save'));
-  for (const button of [resetButton, cancelButton, saveButton]) button.type = 'button';
+  for (const button of [resetButton, cancelButton, saveButton]) {
+    button.type = 'button';
+    attachRipple(button);
+  }
   resetButton.addEventListener('click', reset);
   cancelButton.addEventListener('click', closeSettings);
   saveButton.addEventListener('click', save);
   actions.append(resetButton, spacer, cancelButton, saveButton);
 
-  dialog.append(header, searchUi.row, strip, body, actions);
+  dialog.append(header, strip, body, actions);
   root.append(dialog);
 
   root.addEventListener('click', (event) => {
@@ -429,7 +457,7 @@ function buildDialog(tabs, active) {
 
 /** Open the settings dialog (optionally on a given tab id). */
 export function openSettings(tabId) {
-  closeSettings();
+  teardown();
   const tabs = collectTabs();
   if (!tabs.length) return;
   const active = tabs.some((tab) => tab.id === tabId) ? tabId : tabs[0].id;
@@ -451,7 +479,11 @@ export function openSettings(tabId) {
   lockPageScroll();
   activateTab(active);
   dialog.focus();
-  requestAnimationFrame(updateBadges);
+  requestAnimationFrame(() => {
+    if (state?.root !== root) return;
+    root.classList.add('is-open');
+    updateBadges();
+  });
 }
 
 export { isSettingsOpen };
