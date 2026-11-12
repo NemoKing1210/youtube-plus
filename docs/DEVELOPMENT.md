@@ -18,6 +18,51 @@ npm run verify:artifacts
 npm run ci           # check:i18n + build + verify:artifacts
 ```
 
+## Local harness
+
+The git-ignored `dev/harness/` serves a mock YouTube page and the built
+userscript, so interface and layout rules can be checked without live
+YouTube. Build first, then start the server in a second terminal:
+
+```bash
+npm run build
+node dev/harness/serve.mjs   # http://localhost:5179 (PORT=<n> overrides)
+```
+
+`serve.mjs` answers `/`, `/watch`, `/results`, `/feed/subscriptions`,
+`/@channel` and any path carrying `?page=`. The page script picks a fixture
+template from `?page=` — `home`, `subscriptions`, `search`, `channel` or
+`watch` (the default) — and inserts it into `#page-manager` before the
+userscript boots. The existing shim flags keep working: `?corrupt=1`,
+`?positions=<seconds>`, `?late-guide=1`, `?theme=light`, `?live=1` and
+`?delay-meta=1`. `?shelf=<text>` replaces the subscriptions "Most relevant"
+title (use `?page=subscriptions&shelf=Самое%20актуальное` for the Russian
+case).
+
+Manual checklist:
+
+1. `?page=home`: Shorts are hidden by default (Shorts shelf, Shorts rich items).
+   Posts, live, upcoming, watched, mixes and chips are hidden by their own
+   switches (`data-fixture="home-*"` marks each target).
+2. `?page=subscriptions`: "Most relevant" is hidden; it stays hidden with the
+   UI language set to Russian when the title is `Самое актуальное` (`?shelf=`).
+3. `?page=search`: shelves (`ytd-shelf-renderer`,
+   `ytd-horizontal-card-list-renderer`), Shorts, watched, live and upcoming
+   results hide.
+4. `?page=channel`: Shorts tab and Shorts shelf, posts, trailer, live and
+   upcoming items hide.
+5. `?page=watch`: playlist panel, description, actions, transcript and the
+   player pause overlay hide.
+6. Layout: pick 3/4/6/auto columns and inspect
+   `--ytd-rich-grid-items-per-row` on `ytd-rich-grid-renderer` in DevTools;
+   resize to 360/768/1280/1920/3440 px and confirm auto columns follow.
+7. Custom selectors: add `.mock-target` (watch fixture) and confirm it hides;
+   `body { display:none }` must be ignored.
+8. Volume/loop: enable the volume setting and confirm `video.volume` matches
+   the configured percentage; enable loop and confirm `video.loop === true`.
+9. Save/reload: settings survive a reload; open with `?corrupt=1` and confirm
+   the old/invalid blob does not crash the script.
+
 ## Debugging
 
 - `localStorage.setItem('yp_debug', '1')` enables `logInfo` traces.
