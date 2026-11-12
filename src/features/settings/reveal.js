@@ -19,7 +19,9 @@ export function setRevealed(node, visible, { duration = 180 } = {}) {
   if (pending) clearTimeout(pending);
   timers.delete(node);
 
-  if (prefersReducedMotion()) {
+  // Not connected yet (first render) or reduced motion: settle immediately so
+  // a freshly opened tab never flashes rows that should start hidden.
+  if (prefersReducedMotion() || !node.isConnected) {
     node.hidden = !visible;
     node.classList.remove('is-revealing', 'is-hiding');
     return;
@@ -46,12 +48,13 @@ export function setRevealed(node, visible, { duration = 180 } = {}) {
 
   node.classList.remove('is-revealing');
   node.classList.add('is-hiding');
+  const hideMs = Math.min(duration, 120);
   timers.set(
     node,
     setTimeout(() => {
       node.hidden = true;
       node.classList.remove('is-hiding');
       timers.delete(node);
-    }, duration),
+    }, hideMs),
   );
 }

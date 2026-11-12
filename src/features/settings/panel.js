@@ -220,8 +220,12 @@ function jumpTo(entry) {
     return true;
   };
   let node = pick(entry.id);
-  if (!node || !visible(node)) node = entry.sectionId ? pick(entry.sectionId) : null;
-  if (!node || !visible(node)) return;
+  if (!node || !visible(node)) {
+    const section = entry.sectionId ? pick(entry.sectionId) : null;
+    if (section && visible(section)) node = section;
+    else node = [...panel.querySelectorAll('.yp-card')].find(visible) ?? null;
+  }
+  if (!node) return;
   node.scrollIntoView({ block: 'center', behavior: 'smooth' });
   node.classList.remove('is-found');
   void node.offsetWidth;

@@ -40,6 +40,11 @@
   box-shadow: var(--yp-shadow);
 }
 
+/* Component display rules must not defeat the hidden attribute. */
+.yp-settings [hidden] {
+  display: none;
+}
+
 .yp-settings__header {
   display: flex;
   align-items: center;
@@ -753,6 +758,45 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Conditional rows and cards: reveal.js toggles these classes. */
+.yp-row.is-revealing,
+.yp-hint.is-revealing,
+.yp-group.is-revealing,
+.yp-card.is-revealing > * {
+  animation: yp-reveal-in var(--yp-duration) var(--yp-ease) both;
+}
+
+.yp-row.is-hiding,
+.yp-hint.is-hiding,
+.yp-group.is-hiding,
+.yp-card.is-hiding > * {
+  animation: yp-reveal-out var(--yp-duration-fast) ease both;
+}
+
+/* Cards keep their own entrance animation; only their contents reveal. */
+
+@keyframes yp-reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes yp-reveal-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-2px);
   }
 }
 
