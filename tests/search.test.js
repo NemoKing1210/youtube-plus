@@ -18,3 +18,21 @@ test('matches requires every token', () => {
   assert.equal(matches('Player speed preference', ['player', 'speed']), true);
   assert.equal(matches('Player speed preference', ['player', 'comments']), false);
 });
+
+test('buildIndex indexes textarea controls', () => {
+  const tabs = [{
+    id: 'custom',
+    titleKey: 'interface.title',
+    sections: [{
+      titleKey: 'interface.custom.title',
+      controls: [{
+        type: 'textarea',
+        path: 'custom.selectors',
+        labelKey: 'interface.custom.selectors',
+        hintKey: 'interface.custom.selectorsHint',
+      }],
+    }],
+  }];
+  const index = buildIndex(tabs);
+  assert.ok(index.some((entry) => entry.id === 'custom.selectors' && entry.label));
+});

@@ -61,6 +61,18 @@ export function createNumber({ label, hint, value, min, max, step, onChange }) {
   return { row, control };
 }
 
+export function createTextarea({ label, hint, value, placeholder, rows = 4, onChange }) {
+  const row = createRow('yp-row--textarea');
+  const control = el('textarea', 'yp-textarea');
+  control.rows = rows;
+  control.value = String(value ?? '');
+  if (placeholder) control.placeholder = placeholder;
+  control.spellcheck = false;
+  control.addEventListener('change', () => onChange(control.value));
+  row.append(textBlock(label, hint), control);
+  return { row, control };
+}
+
 export function createHint(text) {
   return el('p', 'yp-hint', text);
 }

@@ -9,6 +9,7 @@ import {
   createRow,
   createSelect,
   createSwitch,
+  createTextarea,
 } from './controls.js';
 
 const label = (key) => (key ? t(key) : '');
@@ -35,6 +36,7 @@ function findId(spec) {
  *   { type: 'switch', path, labelKey, hintKey? }
  *   { type: 'select', path, labelKey, hintKey?, options | () => options }
  *   { type: 'number', path, labelKey, hintKey?, min?, max?, step? }
+ *   { type: 'textarea', path, labelKey, hintKey?, placeholder?, rows?, parse? }
  *   { type: 'hint', textKey }
  *   { type: 'button', labelKey, variant?, onClick(ctx) }
  *   { type: 'group', controls: ControlSpec[] }
@@ -91,6 +93,18 @@ export function renderTab(tab, ctx) {
           step: spec.step,
           onChange: (value) => set(spec, value),
         }).row;
+      case 'textarea': {
+        const isList = spec.parse === 'list';
+        const value = get(spec);
+        return createTextarea({
+          label: label(spec.labelKey),
+          hint: label(spec.hintKey),
+          value: isList ? (Array.isArray(value) ? value.join('\n') : '') : value,
+          placeholder: spec.placeholder,
+          rows: spec.rows,
+          onChange: (text) => set(spec, isList ? text.split(/\r?\n/) : text),
+        }).row;
+      }
       case 'hint':
         return createHint(label(spec.textKey));
       case 'button':
