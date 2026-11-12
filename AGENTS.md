@@ -24,8 +24,10 @@ theme, storage, http, debug) runs independent **features**
 (`src/features/*`). A feature calls
 `registerFeature({ id, fields, tabs, init, apply, scan, navigate })`; its
 `fields` (declarative schema) define defaults, normalization and the settings
-UI, `tabs` are rendered by the shared spec renderer. Details and recipes:
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+UI, `tabs` are rendered by the shared spec renderer. The current features are
+`general` (language, guide row, hotkey), `interface` (hiding rules),
+`layout` (rich-grid columns and cards), `player` and `settings`. Details and
+recipes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Conventions
 
@@ -34,7 +36,33 @@ UI, `tabs` are rendered by the shared spec renderer. Details and recipes:
 - Prefix DOM / storage keys with `yp-` / `data-yp-` / `yp_`. Create UI through
   `el()` (it tags elements with `data-yp-ui`, which scans ignore).
 - Settings live in the schema; never read or write `GM_getValue` directly —
-  use `getFeatureSettings` / `updateFeatureSettings` / `saveSettings`.
+  use `getFeatureSettings` / `updateFeatureSettings` / `saveSettings`. Use the
+  `field.*` builders (`core/schema.js`): `bool`, `enum`, `int`, `string`
+  (trimmed and truncated to `maxLength`), `list` (items normalized, duplicates
+  dropped, capped at `maxItems`) and `record`. Every new setting must be in a
+  schema, not just read from the stored blob.
+- Interface rules live in `src/features/interface/rules.js` and supply either
+  `css` selectors or a `find(root)` function. `on: true` enables a rule by
+  default; `experimental: true` leaves it off and falls back to the generic
+  `interface.experimentalHint`. A `find` rule's match list is reconciled by
+  `syncMarks`, which removes marks from items that no longer match — keep it
+  that way rather than only adding marks. Scope finders to the active
+  `#page-manager`; YouTube keeps old pages in the DOM.
+- User selectors pass through `sanitizeSelector` (`interface/custom.js`)
+  before reaching CSS: maximum 300 characters and 50 entries; `{`, `}`, `;`,
+  `@`, newlines, backslashes and `/*` / `*/` are rejected. Never interpolate
+  raw user input into a stylesheet without this sanitizer.
+- The layout feature writes `#yp-layout-style` from `grid.js`; `auto` derives
+  2–8 columns from the page width, `targetWidth` and `itemGap`. It must
+  re-render on apply, scan, navigation and resize, and clear its stylesheet
+  and resize listener when disabled.
+- Boot is `document-start` on purpose (`src/main.js`, `@run-at` in
+  `vite.config.js`). Do not move boot behind `DOMContentLoaded`: hiding styles
+  must exist before the first paint. Nothing in boot may require `<body>`.
+  When a manager injects before `<html>` exists, boot falls back to
+  `whenReady`; the generated CSS injector appends to
+  `document.head || document.documentElement` or defers to `DOMContentLoaded`
+  the same way. Keep both paths root-safe.
 - Features react to settings through `apply(cfg, prev)` and to the page
   through `scan(root)`; keep both **idempotent** (they run often).
 - Every YouTube-specific selector lives in `src/core/constants.js` (`SEL`) or

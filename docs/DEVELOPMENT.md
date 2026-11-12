@@ -58,8 +58,13 @@ Manual checklist:
    resize to 360/768/1280/1920/3440 px and confirm auto columns follow. With
    the default `targetWidth` 320 and item gap 8 the harness yields auto
    columns of about 2 / 2 / 3 / 5 / 8 at those widths.
-7. Custom selectors: add `.mock-target` (watch fixture) and confirm it hides;
-   `body { display:none }` must be ignored.
+7. Custom selectors: enable them, add `.mock-target` (watch fixture) and
+   confirm it hides; `body { display:none }` must be ignored because of the
+   `{`/`}`/`;` check. Confirm a pasted 301-character selector and a 51st entry
+   are dropped, and that duplicates are stored once. The limits and rejected
+   characters (`{ } ; @`, newline, backslash, `/*`, `*/`) live in
+   `src/features/interface/custom.js`; invalid input must never break the
+   stylesheet or the settings dialog.
 8. Volume/loop: enable the volume setting and confirm `video.volume` matches
    the configured percentage; enable loop and confirm `video.loop === true`.
 9. Save/reload: settings survive a reload; open with `?corrupt=1` and confirm
