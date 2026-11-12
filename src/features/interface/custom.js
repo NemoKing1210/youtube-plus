@@ -1,11 +1,14 @@
 export const MAX_SELECTOR_LENGTH = 300;
 export const MAX_CUSTOM_SELECTORS = 50;
-const FORBIDDEN = /[{};@/\r\n]/;
+const FORBIDDEN = /[{};@\r\n\\]/;
+const COMMENT_DELIMITER = /\/\*|\*\//;
 
 /**
  * Validate a user-entered CSS selector. Returns the trimmed selector or null
- * when it is empty, too long, or contains a character that could break out of
- * the generated declaration block.
+ * when it is empty, too long, or could break out of the generated declaration
+ * block. A bare `/` is allowed (e.g. in `a[href^="/watch"]`), but CSS comment
+ * delimiters (a slash adjacent to an asterisk) and backslashes are rejected:
+ * they can escape the generated `{` or swallow the following rule.
  *
  * @param {unknown} value
  * @returns {string|null}
@@ -14,6 +17,7 @@ export function sanitizeSelector(value) {
   const selector = String(value ?? '').trim();
   if (!selector || selector.length > MAX_SELECTOR_LENGTH) return null;
   if (FORBIDDEN.test(selector)) return null;
+  if (COMMENT_DELIMITER.test(selector)) return null;
   return selector;
 }
 
