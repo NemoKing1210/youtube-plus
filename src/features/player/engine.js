@@ -128,6 +128,12 @@ function applyCurrentVideo() {
   const video = videoEl();
   if (!player || !video) return;
 
+  // Self-sufficient: re-enabling the feature (teardown detached the listeners)
+  // and any DOM scan both restore the wiring here. Idempotent: binding the
+  // same element returns early, and the single `loadedmetadata` handler is
+  // this very `applyForVideo`, so no duplicate handler is installed.
+  bindVideo(video);
+
   const id = videoIdOf(player);
   if (id && id !== state.videoId) {
     state = freshState();
@@ -172,15 +178,23 @@ function onSeeked() {
 
 function onVolumeChange() {
   if (!cfg?.volumeEnabled || !cfg.rememberVolume || !boundVideo) return;
+  // Capture the element that produced this change: if YouTube swaps the
+  // <video> before the throttle fires, the save must be dropped rather than
+  // persisting the replacement element's default volume.
+  const video = boundVideo;
   clearTimeout(volumeTimer);
   volumeTimer = setTimeout(() => {
     volumeTimer = 0;
-    if (!cfg?.volumeEnabled || !cfg.rememberVolume || !boundVideo) return;
-    setValue(VOLUME_KEY, boundVideo.volume);
+    if (!cfg?.volumeEnabled || !cfg.rememberVolume || boundVideo !== video) return;
+    setValue(VOLUME_KEY, video.volume);
   }, VOLUME_SAVE_MS);
 }
 
 function unbindVideo() {
+  // Cancel any pending save even if no element is currently bound, so an
+  // unbind/teardown never leaves a callback that could write stale state.
+  clearTimeout(volumeTimer);
+  volumeTimer = 0;
   if (!boundVideo) return;
   boundVideo.removeEventListener('loadedmetadata', applyForVideo);
   boundVideo.removeEventListener('timeupdate', onTimeUpdate);
