@@ -90,6 +90,17 @@ const navAll = {
   footer: true,
 };
 
+test('subscriptions and search rules are scoped to their pages', () => {
+  const cfg = config({
+    subscriptions: { live: true, upcoming: true, mixes: true },
+    search: { shelves: true, live: true, upcoming: true },
+  });
+  const { css } = buildInterfaceCss(RULES, cfg);
+  assert.match(css, /ytd-browse\[page-subtype="subscriptions"\] ytd-rich-item-renderer:has\([^)]*overlay-style="LIVE"/);
+  assert.match(css, /ytd-search ytd-shelf-renderer/);
+  assert.match(css, /ytd-search ytd-video-renderer:has\([^)]*overlay-style="UPCOMING"/);
+});
+
 test('guide rules match by href instead of localized titles', () => {
   const { css } = buildInterfaceCss(RULES, config({ nav: navAll }));
   assert.match(css, /ytd-guide-entry-renderer:has\(a\[href="\/shorts"\]/);

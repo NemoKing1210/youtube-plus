@@ -16,6 +16,8 @@ test('v0.1 interface settings survive normalization', () => {
   assert.equal(next.feed.shorts, true);
   assert.equal(next.nav.premium, false);
   assert.equal(next.watch.related, true);
+  assert.equal(next.subscriptions.watched, false);
+  assert.equal(next.search.shelves, false);
   assert.deepEqual(next.custom, { enabled: false, selectors: [] });
 });
 

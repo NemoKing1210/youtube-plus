@@ -1,4 +1,4 @@
-import { findWatched } from './finders.js';
+import { findWatched, findMostRelevant } from './finders.js';
 
 /**
  * Declarative clean-up rules. A rule hides something on YouTube and is
@@ -189,6 +189,74 @@ export const RULES = [
     ],
   },
   { group: 'nav', key: 'footer', css: ['ytd-guide-renderer #footer'] },
+  {
+    group: 'subscriptions',
+    key: 'mostRelevant',
+    experimental: true,
+    hint: true,
+    find: (root) => {
+      const page = root.querySelector?.('ytd-browse[page-subtype="subscriptions"]');
+      return page ? findMostRelevant(page) : [];
+    },
+  },
+  {
+    group: 'subscriptions',
+    key: 'watched',
+    find: (root) => {
+      const page = root.querySelector?.('ytd-browse[page-subtype="subscriptions"]');
+      return page ? findWatched(page) : [];
+    },
+  },
+  {
+    group: 'subscriptions',
+    key: 'live',
+    css: [
+      'ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer:has(ytd-thumbnail-overlay-time-status-renderer[overlay-style="LIVE"])',
+    ],
+  },
+  {
+    group: 'subscriptions',
+    key: 'upcoming',
+    css: [
+      'ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer:has(ytd-thumbnail-overlay-time-status-renderer[overlay-style="UPCOMING"])',
+    ],
+  },
+  {
+    group: 'subscriptions',
+    key: 'mixes',
+    css: [
+      'ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer:has(a[href*="start_radio=1"])',
+      'ytd-browse[page-subtype="subscriptions"] ytd-radio-renderer',
+    ],
+  },
+  {
+    group: 'search',
+    key: 'shelves',
+    hint: true,
+    css: ['ytd-search ytd-shelf-renderer', 'ytd-search ytd-horizontal-card-list-renderer'],
+  },
+  {
+    group: 'search',
+    key: 'watched',
+    find: (root) => {
+      const page = root.querySelector?.('ytd-search');
+      return page ? findWatched(page) : [];
+    },
+  },
+  {
+    group: 'search',
+    key: 'live',
+    css: [
+      'ytd-search ytd-video-renderer:has(ytd-thumbnail-overlay-time-status-renderer[overlay-style="LIVE"])',
+    ],
+  },
+  {
+    group: 'search',
+    key: 'upcoming',
+    css: [
+      'ytd-search ytd-video-renderer:has(ytd-thumbnail-overlay-time-status-renderer[overlay-style="UPCOMING"])',
+    ],
+  },
   { group: 'watch', key: 'related', css: ['#secondary-inner #related'] },
   { group: 'watch', key: 'comments', css: ['ytd-comments#comments'] },
   { group: 'watch', key: 'chat', css: ['#chat-container'] },
