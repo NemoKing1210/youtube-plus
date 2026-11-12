@@ -23,6 +23,7 @@ const NAMESPACES = [
   'common',
   'interface',
   'player',
+  'layout',
 ];
 
 function* walk(dir) {
