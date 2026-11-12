@@ -21,6 +21,22 @@ test('v0.1 interface settings survive normalization', () => {
   assert.deepEqual(next.custom, { enabled: false, selectors: [] });
 });
 
+test('a full v0.1 blob gains every new group with defaults', () => {
+  const next = normalizeFields(interfaceFields(), {
+    enabled: true,
+    feed: { shorts: true },
+    nav: { shorts: true, premium: false },
+    watch: { related: true, comments: false, chat: false, merch: false },
+    chrome: { endCards: false, cards: false },
+  });
+  assert.equal(next.feed.shorts, true);
+  assert.equal(next.watch.related, true);
+  assert.equal(next.subscriptions.mostRelevant, false);
+  assert.equal(next.search.shelves, false);
+  assert.equal(next.channel.shortsTab, false);
+  assert.equal(next.custom.enabled, false);
+});
+
 test('custom selectors are normalized and capped', () => {
   const next = normalizeFields(interfaceFields(), {
     custom: { enabled: true, selectors: [' a ', 'a', 42, 'b'] },

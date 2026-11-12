@@ -265,8 +265,71 @@ export const RULES = [
     key: 'merch',
     css: ['#donation-shelf', 'ytd-merch-shelf-renderer', 'ytd-product-list'],
   },
+  {
+    group: 'watch',
+    key: 'playlist',
+    css: ['ytd-playlist-panel-renderer', '#playlist'],
+  },
+  {
+    group: 'watch',
+    key: 'description',
+    css: [
+      '#description-inline-expander',
+      'ytd-text-inline-expander#description',
+      'ytd-watch-metadata #description',
+    ],
+  },
+  {
+    group: 'watch',
+    key: 'actions',
+    hint: true,
+    css: ['ytd-watch-metadata #actions', '#actions-inner'],
+  },
+  {
+    group: 'watch',
+    key: 'transcript',
+    css: ['ytd-transcript-renderer', '#panels ytd-transcript-renderer'],
+  },
+  {
+    group: 'channel',
+    key: 'shortsTab',
+    experimental: true,
+    hint: true,
+    css: [
+      'yt-tab-shape[tab-title="Shorts"]',
+      'tp-yt-paper-tab:has(.tab-title[title="Shorts"])',
+    ],
+  },
+  {
+    group: 'channel',
+    key: 'posts',
+    css: [
+      'ytd-browse[page-subtype="channels"] ytd-rich-section-renderer:has(ytd-post-renderer)',
+      'ytd-backstage-post-thread-renderer',
+    ],
+  },
+  {
+    group: 'channel',
+    key: 'trailer',
+    css: ['ytd-channel-video-player-renderer', '#channel-trailer'],
+  },
+  {
+    group: 'channel',
+    key: 'live',
+    css: [
+      'ytd-browse[page-subtype="channels"] ytd-rich-item-renderer:has([overlay-style="LIVE"])',
+    ],
+  },
+  {
+    group: 'channel',
+    key: 'upcoming',
+    css: [
+      'ytd-browse[page-subtype="channels"] ytd-rich-item-renderer:has([overlay-style="UPCOMING"])',
+    ],
+  },
   { group: 'chrome', key: 'endCards', css: ['.html5-endscreen'] },
   { group: 'chrome', key: 'cards', css: ['.ytp-cards-teaser', '.ytp-cards-button'] },
+  { group: 'chrome', key: 'pauseOverlay', css: ['.ytp-pause-overlay'] },
 ];
 
 export function ruleId(rule) {

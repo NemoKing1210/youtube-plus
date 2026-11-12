@@ -115,3 +115,19 @@ test('guide entries are off by default except shorts', () => {
   assert.doesNotMatch(css, /a#endpoint\[href="\/feed\/history"\]/);
   assert.doesNotMatch(css, /a#endpoint\[href="\/"\]/);
 });
+
+test('watch, channel and player rules produce the expected selectors', () => {
+  const cfg = config({
+    watch: { related: false, comments: false, chat: false, merch: false, playlist: true, description: true, actions: true, transcript: true },
+    channel: { shortsTab: true, posts: true, trailer: true, live: true, upcoming: true },
+    chrome: { endCards: false, cards: false, pauseOverlay: true },
+  });
+  const { css } = buildInterfaceCss(RULES, cfg);
+  assert.match(css, /ytd-playlist-panel-renderer/);
+  assert.match(css, /#description-inline-expander/);
+  assert.match(css, /ytd-watch-metadata #actions/);
+  assert.match(css, /ytd-transcript-renderer/);
+  assert.match(css, /yt-tab-shape\[tab-title="Shorts"\]/);
+  assert.match(css, /ytd-channel-video-player-renderer/);
+  assert.match(css, /\.ytp-pause-overlay/);
+});
