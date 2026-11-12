@@ -22,6 +22,26 @@ test('int rounds, clamps and falls back', () => {
   assert.equal(normalizeField(spec, 'nope'), 5);
 });
 
+test('string trims, caps and falls back', () => {
+  const spec = field.string('', { maxLength: 5 });
+  assert.equal(normalizeField(spec, '  abcdef  '), 'abcde');
+  assert.equal(normalizeField(spec, 42), '');
+  assert.equal(normalizeField(spec, '   '), '');
+});
+
+test('list normalizes items, drops empties and caps the count', () => {
+  const spec = field.list(field.string('', { maxLength: 4 }), { maxItems: 2 });
+  assert.deepEqual(normalizeField(spec, [' a ', 42, 'bbbbbb', 'c']), ['a', 'bbbb']);
+  assert.deepEqual(normalizeField(spec, 'nope'), []);
+});
+
+test('list defaults are independent copies', () => {
+  const fields = { items: field.list(field.string('')) };
+  const first = defaultsOf(fields);
+  first.items.push('x');
+  assert.deepEqual(defaultsOf(fields).items, []);
+});
+
 test('record drops unknown keys and fills defaults', () => {
   const fields = { a: field.bool(true), nested: field.record({ b: field.int(2) }) };
   assert.deepEqual(

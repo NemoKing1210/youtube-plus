@@ -26,6 +26,18 @@ export const field = {
     max,
   }),
 
+  string: (def = '', { maxLength = 200 } = {}) => ({
+    type: 'string',
+    default: def,
+    maxLength,
+  }),
+
+  list: (item, { maxItems = 50 } = {}) => ({
+    type: 'list',
+    item,
+    maxItems,
+  }),
+
   /** Nested object with its own field map. */
   record: (fields) => ({ type: 'record', fields }),
 };
@@ -37,6 +49,7 @@ function enumValues(spec) {
 /** Default value of one field (deep-cloned). */
 export function defaultOf(spec) {
   if (spec.type === 'record') return defaultsOf(spec.fields);
+  if (spec.type === 'list') return [];
   return Array.isArray(spec.default) ? [...spec.default] : spec.default;
 }
 
@@ -59,6 +72,22 @@ export function normalizeField(spec, raw) {
       return Number.isFinite(value)
         ? Math.min(spec.max, Math.max(spec.min, value))
         : spec.default;
+    }
+    case 'string': {
+      if (typeof raw !== 'string') return spec.default;
+      return raw.trim().slice(0, spec.maxLength);
+    }
+    case 'list': {
+      if (!Array.isArray(raw)) return [];
+      const out = [];
+      for (const value of raw) {
+        const item = normalizeField(spec.item, value);
+        const empty = item === '' || item == null;
+        if (empty || out.includes(item)) continue;
+        out.push(item);
+        if (out.length >= spec.maxItems) break;
+      }
+      return out;
     }
     case 'record':
       return normalizeFields(spec.fields, raw);
