@@ -136,11 +136,27 @@ and gets its tab in the settings dialog.
 ## Settings UI
 
 - The dialog edits a **draft** copy; nothing is saved or applied until Save.
-- Tabs come from the registry (feature order, then declaration order). A tab
-  is a spec (`sections` → `controls`) or fully custom (`render(ctx)`).
-- Controls: `switch`, `select`, `number`, `group`, `hint`, `button`,
-  `custom`. `path` is relative to the feature's section and may be dotted.
-  Any control or section accepts `showIf(section, root)`.
+- Shell (`settings/panel.js`): a header with the title, search pill and close
+  button, a horizontal chip tab strip, a scrolling card body and a
+  Reset / Cancel / Save footer. Open, close and tab switches are CSS
+  animations; closing removes the root on `animationend` with a 200 ms
+  fallback, and reopening always tears down any previous root first.
+- Tabs come from the registry (feature order, then declaration order) and may
+  carry an `icon` (shown in the chip) and a `badge(draft)`. A tab is a spec
+  (`sections` → `controls`) or fully custom (`render(ctx)`).
+- Each section renders as a `.yp-card` with an optional `titleKey`, a
+  `descKey` sentence shown under the title, and its controls. Cards stagger in
+  through `--yp-card-index`; search indexes the section description together
+  with the control labels.
+- Controls: `switch`, `select`, `number`, `textarea`, `group`, `hint`,
+  `button`, `custom`. `path` is relative to the feature's section and may be
+  dotted. `hintKey` renders the secondary line under a control. Any control or
+  section accepts `showIf(section, root)`.
+- `settings/reveal.js` shows and hides conditional rows with a short fade and
+  rise. Its per-node timers are cancelled on rapid toggles, so a row can never
+  stick; reduced motion toggles `hidden` instantly.
+- `ui/ripple.js` adds the Material-style pointer ripple to buttons. It ignores
+  keyboard activation and prefers-reduced-motion.
 - Search (`settings/search.js`) builds its index from the tab specs, so a
   control is searchable as soon as it has a `labelKey`. Results open the tab,
   scroll to `data-yp-find` and flash it.

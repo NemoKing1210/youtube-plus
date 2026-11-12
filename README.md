@@ -90,9 +90,15 @@ rejected, as are empty and duplicate entries.
 
 ### Settings
 
-- Search across every setting, including tabs you have not opened
+- A YouTube-native dialog: chip tabs across the top, grouped setting cards
+  with a short description per group and a hint under each control
+- Animated open, close and tab transitions, a card entrance stagger and a
+  reduced-motion-aware fallback
+- Search across every setting and card description, including tabs you have
+  not opened
 - Backup tab: copy the settings JSON out, paste a backup in
 - About tab: version, repository, licence
+- Full-screen sheet layout with a safe-area footer on phones
 - English, Russian, Chinese, Spanish, Portuguese, German, French and Japanese
 
 ## Development
