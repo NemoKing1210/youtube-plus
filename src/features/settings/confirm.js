@@ -17,7 +17,7 @@ export function confirmDialog({ title, message, confirmLabel, danger = false }) 
     dialog.append(el('h3', 'yp-confirm__title', title), el('p', 'yp-confirm__text', message));
 
     const actions = el('div', 'yp-confirm__actions');
-    const cancel = el('button', 'yp-btn-ui yp-btn-ui--ghost', t('common.cancel'));
+    const cancel = el('button', 'yp-btn-ui yp-btn-ui--tonal', t('common.cancel'));
     const confirm = el('button', `yp-btn-ui yp-btn-ui--${danger ? 'danger' : 'primary'}`, confirmLabel);
     cancel.type = 'button';
     confirm.type = 'button';

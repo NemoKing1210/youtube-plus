@@ -1,4 +1,6 @@
 import { el } from '../../utils/dom.js';
+import { iconNode } from '../../ui/icons.js';
+import { attachRipple } from '../../ui/ripple.js';
 
 export function createRow(className = '') {
   return el('div', `yp-row${className ? ` ${className}` : ''}`);
@@ -17,6 +19,7 @@ export function createSwitch({ label, hint, checked, onChange }) {
   const input = el('input', 'yp-switch__input');
   input.type = 'checkbox';
   input.checked = Boolean(checked);
+  input.setAttribute('aria-label', label);
   input.addEventListener('change', () => onChange(input.checked));
   const track = el('span', 'yp-switch__track');
   track.setAttribute('aria-hidden', 'true');
@@ -27,7 +30,9 @@ export function createSwitch({ label, hint, checked, onChange }) {
 
 export function createSelect({ label, hint, options, value, onChange }) {
   const row = createRow('yp-row--select');
-  const control = el('select', 'yp-select');
+  const wrapper = el('span', 'yp-select');
+  const control = el('select', 'yp-select__input');
+  control.setAttribute('aria-label', label);
   for (const option of options) {
     const node = document.createElement('option');
     node.value = option.value;
@@ -36,7 +41,10 @@ export function createSelect({ label, hint, options, value, onChange }) {
     control.append(node);
   }
   control.addEventListener('change', () => onChange(control.value));
-  row.append(textBlock(label, hint), control);
+  const chevron = el('span', 'yp-select__chevron');
+  chevron.append(iconNode('chevronDown', 18));
+  wrapper.append(control, chevron);
+  row.append(textBlock(label, hint), wrapper);
   return { row, control };
 }
 
@@ -44,6 +52,8 @@ export function createNumber({ label, hint, value, min, max, step, onChange }) {
   const row = createRow('yp-row--number');
   const control = el('input', 'yp-number');
   control.type = 'number';
+  control.inputMode = 'numeric';
+  control.setAttribute('aria-label', label);
   if (Number.isFinite(min)) control.min = String(min);
   if (Number.isFinite(max)) control.max = String(max);
   if (Number.isFinite(step)) control.step = String(step);
@@ -66,6 +76,7 @@ export function createTextarea({ label, hint, value, placeholder, rows = 4, onCh
   const control = el('textarea', 'yp-textarea');
   control.rows = rows;
   control.value = String(value ?? '');
+  control.setAttribute('aria-label', label);
   if (placeholder) control.placeholder = placeholder;
   control.spellcheck = false;
   control.addEventListener('change', () => onChange(control.value));
@@ -74,12 +85,17 @@ export function createTextarea({ label, hint, value, placeholder, rows = 4, onCh
 }
 
 export function createHint(text) {
-  return el('p', 'yp-hint', text);
+  const hint = el('p', 'yp-hint');
+  const glyph = el('span', 'yp-hint__icon');
+  glyph.append(iconNode('info', 16));
+  hint.append(glyph, text);
+  return hint;
 }
 
 export function createButton({ label, variant = 'ghost', onClick }) {
   const button = el('button', `yp-btn-ui yp-btn-ui--${variant}`, label);
   button.type = 'button';
+  attachRipple(button);
   button.addEventListener('click', onClick);
   return button;
 }
