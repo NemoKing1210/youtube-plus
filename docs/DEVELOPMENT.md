@@ -55,7 +55,9 @@ Manual checklist:
    player pause overlay hide.
 6. Layout: pick 3/4/6/auto columns and inspect
    `--ytd-rich-grid-items-per-row` on `ytd-rich-grid-renderer` in DevTools;
-   resize to 360/768/1280/1920/3440 px and confirm auto columns follow.
+   resize to 360/768/1280/1920/3440 px and confirm auto columns follow. With
+   the default `targetWidth` 320 and item gap 8 the harness yields auto
+   columns of about 2 / 2 / 3 / 5 / 8 at those widths.
 7. Custom selectors: add `.mock-target` (watch fixture) and confirm it hides;
    `body { display:none }` must be ignored.
 8. Volume/loop: enable the volume setting and confirm `video.volume` matches
