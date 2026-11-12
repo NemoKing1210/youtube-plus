@@ -65,6 +65,23 @@ Manual checklist:
 9. Save/reload: settings survive a reload; open with `?corrupt=1` and confirm
    the old/invalid blob does not crash the script.
 
+## Boot timing and flicker
+
+The build metadata declares `@run-at document-start`. The manager must honour
+it (Tampermonkey, Violentmonkey and ScriptCat do); a manager that injects at
+`document-idle` will show the content this script hides for a frame before the
+stylesheets apply. `src/main.js` boots immediately when
+`document.documentElement` already exists and otherwise falls back to
+`whenReady` (`DOMContentLoaded`) — nothing in boot needs `<body>`, so both
+paths are safe, and the `data-yp-root` guard makes boot idempotent.
+
+To check for flicker, build the script, install it and open
+`www.youtube.com` with DevTools Network throttling set to **Slow 4G**. Hidden
+blocks must not paint before the styles apply, the console must stay clean with
+`localStorage.setItem('yp_debug', '1')`, and navigation, the player and the
+settings dialog must still work. This is a manual step: it needs a live
+browser with a userscript manager and cannot run in CI.
+
 ## Debugging
 
 - `localStorage.setItem('yp_debug', '1')` enables `logInfo` traces.

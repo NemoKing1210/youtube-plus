@@ -48,4 +48,7 @@ function boot() {
   scanNow();
 }
 
-whenReady(boot);
+// Run at document-start so hiding styles exist before the page paints. A
+// manager that injects before <html> exists falls back to DOM readiness.
+if (document.documentElement) boot();
+else whenReady(boot);

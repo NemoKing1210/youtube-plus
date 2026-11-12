@@ -48,7 +48,7 @@ export default defineConfig({
         icon: 'https://www.youtube.com/favicon.ico',
         match: ['https://www.youtube.com/*', 'https://youtube.com/*'],
         grant: ['GM_getValue', 'GM_setValue', 'GM_registerMenuCommand'],
-        'run-at': 'document-idle',
+        'run-at': 'document-start',
         noframes: true,
       },
       server: {

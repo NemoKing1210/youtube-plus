@@ -37,8 +37,20 @@ src/
 
 ## Boot sequence
 
+The script declares `@run-at document-start`. Boot runs as soon as
+`document.documentElement` exists (falling back to `whenReady`, i.e.
+`DOMContentLoaded`, for managers that inject earlier) so the hiding
+stylesheets are in the document before YouTube paints its first frame. This is
+safe because nothing in the boot path needs `<body>`: `ensureStyle` and the
+Vite CSS injector append to `document.head || document.documentElement`,
+`core/scan.js` observes `document.documentElement`, and history hooks plus URL
+polling do not touch the page body. The `data-yp-root` guard keeps the second
+call a no-op if a manager injects the script again. The interface rules then
+hide content as soon as nodes are added, and the MutationObserver catches up
+with markup rendered after boot.
+
 ```text
-whenReady → boot()
+if (document.documentElement) boot() else whenReady(boot)
   guard: <html> already has data-yp-root → return
   set data-yp-root
   loadSettings()                  # normalize the stored blob against every schema
