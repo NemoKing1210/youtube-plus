@@ -1,3 +1,5 @@
+import { findWatched } from './finders.js';
+
 /**
  * Declarative clean-up rules. A rule hides something on YouTube and is
  * toggled by one boolean in settings (`interface[group][key]`).
@@ -36,11 +38,52 @@ export const RULES = [
     group: 'feed',
     key: 'shorts',
     on: true,
+    hint: true,
+    css: SHORTS_SELECTORS,
+  },
+  {
+    group: 'feed',
+    key: 'posts',
     css: [
-      'grid-shelf-view-model:has(ytm-shorts-lockup-view-model)',
-      'ytd-reel-shelf-renderer',
-      'ytd-rich-shelf-renderer[is-shorts]',
+      'ytd-browse[page-subtype="home"] ytd-rich-section-renderer:has(ytd-post-renderer)',
+      'ytd-browse[page-subtype="home"] ytd-rich-item-renderer:has(ytd-post-renderer)',
     ],
+  },
+  {
+    group: 'feed',
+    key: 'live',
+    css: [
+      'ytd-browse[page-subtype="home"] ytd-rich-item-renderer:has(ytd-thumbnail-overlay-time-status-renderer[overlay-style="LIVE"])',
+    ],
+  },
+  {
+    group: 'feed',
+    key: 'upcoming',
+    css: [
+      'ytd-browse[page-subtype="home"] ytd-rich-item-renderer:has(ytd-thumbnail-overlay-time-status-renderer[overlay-style="UPCOMING"])',
+    ],
+  },
+  {
+    group: 'feed',
+    key: 'watched',
+    hint: true,
+    find: (root) => {
+      const page = root.querySelector?.('ytd-browse[page-subtype="home"]');
+      return page ? findWatched(page) : [];
+    },
+  },
+  {
+    group: 'feed',
+    key: 'mixes',
+    css: [
+      'ytd-browse[page-subtype="home"] ytd-rich-item-renderer:has(a[href*="start_radio=1"])',
+      'ytd-browse[page-subtype="home"] ytd-radio-renderer',
+    ],
+  },
+  {
+    group: 'feed',
+    key: 'chips',
+    css: ['ytd-feed-filter-chip-bar-renderer'],
   },
   {
     group: 'nav',

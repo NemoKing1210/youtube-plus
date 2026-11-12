@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { RULES, ruleId } from '../src/features/interface/rules.js';
+import { RULES, SHORTS_SELECTORS, ruleId } from '../src/features/interface/rules.js';
 import { buildInterfaceCss } from '../src/features/interface/css.js';
 
 const config = (overrides = {}) => ({
@@ -27,10 +27,29 @@ const config = (overrides = {}) => ({
 
 test('defaults hide both Shorts rules only', () => {
   const { css } = buildInterfaceCss(RULES, config());
-  assert.match(css, /grid-shelf-view-model:has\(ytm-shorts-lockup-view-model\)/);
+  for (const selector of SHORTS_SELECTORS) assert.ok(css.includes(selector), selector);
   assert.match(css, /ytd-guide-entry-renderer:has\(a\[href="\/shorts"\]/);
   assert.doesNotMatch(css, /#secondary-inner #related/);
   assert.doesNotMatch(css, /ytd-comments#comments/);
+});
+
+test('home rules are scoped to the home page and off by default', () => {
+  const home = {
+    shorts: true, posts: true, live: true, upcoming: true,
+    watched: true, mixes: true, chips: true,
+  };
+  const { css } = buildInterfaceCss(RULES, config({ feed: home }));
+  assert.match(css, /ytd-browse\[page-subtype="home"\] ytd-rich-item-renderer:has\(ytd-post-renderer\)/);
+  assert.match(css, /overlay-style="LIVE"/);
+  assert.match(css, /overlay-style="UPCOMING"/);
+  assert.match(css, /a\[href\*="start_radio=1"\]/);
+  assert.match(css, /ytd-feed-filter-chip-bar-renderer/);
+});
+
+test('feed.shorts uses the shared Shorts selectors', () => {
+  const { css } = buildInterfaceCss(RULES, config());
+  assert.match(css, /grid-shelf-view-model:has\(a\[href\^="\/shorts\/"\]\)/);
+  assert.match(css, /ytd-rich-item-renderer:has\(a\[href\^="\/shorts\/"\]\)/);
 });
 
 test('the master switch disables everything', () => {
@@ -42,11 +61,7 @@ test('a previewed rule is excluded and its selectors returned', () => {
   const id = ruleId({ group: 'feed', key: 'shorts' });
   const { css, previewSelectors } = buildInterfaceCss(RULES, config(), { hoveredId: id });
   assert.doesNotMatch(css, /grid-shelf-view-model/);
-  assert.deepEqual(previewSelectors, [
-    'grid-shelf-view-model:has(ytm-shorts-lockup-view-model)',
-    'ytd-reel-shelf-renderer',
-    'ytd-rich-shelf-renderer[is-shorts]',
-  ]);
+  assert.deepEqual(previewSelectors, SHORTS_SELECTORS);
 });
 
 test('a previewed rule is returned even when it is off', () => {
