@@ -42,9 +42,11 @@ The script declares `@run-at document-start`. Boot runs as soon as
 `DOMContentLoaded`, for managers that inject earlier) so the hiding
 stylesheets are in the document before YouTube paints its first frame. This is
 safe because nothing in the boot path needs `<body>`: `ensureStyle` and the
-Vite CSS injector append to `document.head || document.documentElement`,
-`core/scan.js` observes `document.documentElement`, and history hooks plus URL
-polling do not touch the page body. The `data-yp-root` guard keeps the second
+Vite CSS injector append to `document.head || document.documentElement` when a
+root exists, and the CSS injector defers the append to `DOMContentLoaded` when
+a manager injects before `<html>` is created (the boot dispatch uses the same
+fallback); `core/scan.js` observes `document.documentElement`, and history
+hooks plus URL polling do not touch the page body. The `data-yp-root` guard keeps the second
 call a no-op if a manager injects the script again. The interface rules then
 hide content as soon as nodes are added, and the MutationObserver catches up
 with markup rendered after boot.

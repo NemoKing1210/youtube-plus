@@ -58,12 +58,22 @@ export default defineConfig({
         fileName: 'youtube-plus.user.js',
         metaFileName: true,
         // The default injector references GM_addStyle, which would add a
-        // fourth grant; build the style node instead.
+        // fourth grant; build the style node instead. This function is
+        // stringified into the bundle, so it must stay self-contained. A
+        // manager can inject before <html> exists: defer the append to
+        // DOMContentLoaded instead of dereferencing a null root.
         cssSideEffects: () => (css) => {
           const style = document.createElement('style');
           style.setAttribute('data-yp-ui', '');
           style.textContent = css;
-          (document.head || document.documentElement).append(style);
+          const root = document.head || document.documentElement;
+          if (root) {
+            root.append(style);
+            return;
+          }
+          document.addEventListener('DOMContentLoaded', () => {
+            (document.head || document.documentElement).append(style);
+          }, { once: true });
         },
       },
     }),

@@ -72,8 +72,11 @@ it (Tampermonkey, Violentmonkey and ScriptCat do); a manager that injects at
 `document-idle` will show the content this script hides for a frame before the
 stylesheets apply. `src/main.js` boots immediately when
 `document.documentElement` already exists and otherwise falls back to
-`whenReady` (`DOMContentLoaded`) — nothing in boot needs `<body>`, so both
-paths are safe, and the `data-yp-root` guard makes boot idempotent.
+`whenReady` (`DOMContentLoaded`). The generated stylesheet injector behaves the
+same way: it appends to `document.head || document.documentElement` when one
+exists and otherwise defers the append to `DOMContentLoaded`. Nothing in boot
+needs `<body>`, so both paths are safe, and the `data-yp-root` guard makes
+boot idempotent.
 
 To check for flicker, build the script, install it and open
 `www.youtube.com` with DevTools Network throttling set to **Slow 4G**. Hidden
