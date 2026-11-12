@@ -35,6 +35,19 @@ test('list normalizes items, drops empties and caps the count', () => {
   assert.deepEqual(normalizeField(spec, 'nope'), []);
 });
 
+test('list honours an empty or negative cap', () => {
+  const items = field.list(field.string(''));
+  assert.deepEqual(normalizeField(field.list(field.string(''), { maxItems: 0 }), ['a']), []);
+  assert.deepEqual(normalizeField(field.list(field.string(''), { maxItems: -1 }), ['a']), []);
+  assert.deepEqual(normalizeField(items, ['a']), ['a']);
+});
+
+test('list dedupes entries and drops null items', () => {
+  const spec = field.list(field.string(''));
+  assert.deepEqual(normalizeField(spec, [' a ', 'a']), ['a']);
+  assert.deepEqual(normalizeField(spec, ['a', null]), ['a']);
+});
+
 test('list defaults are independent copies', () => {
   const fields = { items: field.list(field.string('')) };
   const first = defaultsOf(fields);

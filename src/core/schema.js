@@ -81,11 +81,11 @@ export function normalizeField(spec, raw) {
       if (!Array.isArray(raw)) return [];
       const out = [];
       for (const value of raw) {
+        if (out.length >= spec.maxItems) break;
         const item = normalizeField(spec.item, value);
         const empty = item === '' || item == null;
         if (empty || out.includes(item)) continue;
         out.push(item);
-        if (out.length >= spec.maxItems) break;
       }
       return out;
     }
