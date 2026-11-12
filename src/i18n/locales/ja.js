@@ -44,7 +44,7 @@ export default {
   'interface.enabled': '選択した要素を非表示',
   'interface.hint': '変更は保存後に適用されます。',
   'interface.experimentalHint': 'YouTube のページ構造が変わると動作しなくなる場合があります。',
-  'interface.group.feed': 'フィード',
+  'interface.group.feed': 'ホーム',
   'interface.group.nav': 'ナビゲーション',
   'interface.group.subscriptions': '登録チャンネル',
   'interface.group.search': '検索',

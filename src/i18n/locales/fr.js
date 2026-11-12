@@ -44,7 +44,7 @@ export default {
   'interface.enabled': 'Masquer les éléments sélectionnés',
   'interface.hint': 'Les modifications s’appliquent à l’enregistrement.',
   'interface.experimentalHint': 'Peut cesser de fonctionner si YouTube modifie sa structure.',
-  'interface.group.feed': 'Fils',
+  'interface.group.feed': 'Accueil',
   'interface.group.nav': 'Navigation',
   'interface.group.subscriptions': 'Abonnements',
   'interface.group.search': 'Recherche',

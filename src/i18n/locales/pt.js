@@ -44,7 +44,7 @@ export default {
   'interface.enabled': 'Ocultar os elementos selecionados',
   'interface.hint': 'As alterações são aplicadas ao salvar.',
   'interface.experimentalHint': 'Pode falhar quando o YouTube alterar a estrutura da página.',
-  'interface.group.feed': 'Feeds',
+  'interface.group.feed': 'Início',
   'interface.group.nav': 'Guia',
   'interface.group.subscriptions': 'Inscrições',
   'interface.group.search': 'Pesquisa',

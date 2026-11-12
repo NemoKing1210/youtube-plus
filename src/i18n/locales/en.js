@@ -44,7 +44,7 @@ export default {
   'interface.enabled': 'Hide selected elements',
   'interface.hint': 'Changes apply when you save.',
   'interface.experimentalHint': 'May break when YouTube changes its markup.',
-  'interface.group.feed': 'Feeds',
+  'interface.group.feed': 'Home feed',
   'interface.group.nav': 'Guide',
   'interface.group.subscriptions': 'Subscriptions',
   'interface.group.search': 'Search',

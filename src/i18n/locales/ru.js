@@ -44,7 +44,7 @@ export default {
   'interface.enabled': 'Скрывать выбранные элементы',
   'interface.hint': 'Изменения применяются после сохранения.',
   'interface.experimentalHint': 'Может перестать работать, когда YouTube изменит разметку.',
-  'interface.group.feed': 'Ленты',
+  'interface.group.feed': 'Главная',
   'interface.group.nav': 'Навигация',
   'interface.group.subscriptions': 'Подписки',
   'interface.group.search': 'Поиск',

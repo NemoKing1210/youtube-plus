@@ -44,7 +44,7 @@ export default {
   'interface.enabled': 'Ausgewählte Elemente ausblenden',
   'interface.hint': 'Änderungen werden beim Speichern angewendet.',
   'interface.experimentalHint': 'Kann fehlschlagen, wenn YouTube sein Markup ändert.',
-  'interface.group.feed': 'Feeds',
+  'interface.group.feed': 'Startseite',
   'interface.group.nav': 'Navigation',
   'interface.group.subscriptions': 'Abonnements',
   'interface.group.search': 'Suche',

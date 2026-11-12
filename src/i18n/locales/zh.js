@@ -44,7 +44,7 @@ export default {
   'interface.enabled': '隐藏选定元素',
   'interface.hint': '保存后生效。',
   'interface.experimentalHint': '当 YouTube 更改页面结构时可能失效。',
-  'interface.group.feed': '信息流',
+  'interface.group.feed': '首页',
   'interface.group.nav': '导航',
   'interface.group.subscriptions': '订阅内容',
   'interface.group.search': '搜索',
