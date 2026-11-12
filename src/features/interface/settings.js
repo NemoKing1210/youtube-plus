@@ -28,6 +28,7 @@ export function interfaceTab(rules = RULES) {
   const sections = [
     {
       titleKey: 'interface.section',
+      descKey: 'interface.sectionDesc',
       controls: [
         { type: 'switch', path: 'enabled', labelKey: 'interface.enabled' },
         { type: 'hint', textKey: 'interface.hint' },
@@ -40,6 +41,7 @@ export function interfaceTab(rules = RULES) {
     if (!groupRules.length) continue;
     sections.push({
       titleKey: `interface.group.${group}`,
+      descKey: `interface.group.${group}Desc`,
       showIf: (section) => section.enabled === true,
       controls: groupRules.map((rule) => ({
         type: 'switch',
@@ -57,6 +59,7 @@ export function interfaceTab(rules = RULES) {
 
   sections.push({
     titleKey: 'interface.custom.title',
+    descKey: 'interface.custom.desc',
     showIf: (section) => section.enabled === true,
     controls: [
       { type: 'switch', path: 'custom.enabled', labelKey: 'interface.custom.enabled' },
@@ -73,5 +76,5 @@ export function interfaceTab(rules = RULES) {
     ],
   });
 
-  return { id: 'interface', titleKey: 'interface.title', sections };
+  return { id: 'interface', titleKey: 'interface.title', icon: 'eyeOff', sections };
 }

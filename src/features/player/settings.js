@@ -21,26 +21,38 @@ export function playerFields() {
 }
 
 export function playerTab() {
+  const showPlayer = (section) => section.enabled === true;
+  const showVolume = (section) => showPlayer(section) && section.volumeEnabled === true;
+
   return {
     id: 'player',
     titleKey: 'player.title',
+    icon: 'play',
     sections: [
       {
         titleKey: 'player.section',
+        descKey: 'player.sectionDesc',
         controls: [
-          { type: 'switch', path: 'enabled', labelKey: 'player.enabled' },
+          {
+            type: 'switch',
+            path: 'enabled',
+            labelKey: 'player.enabled',
+            hintKey: 'player.enabledHint',
+          },
           {
             type: 'select',
             path: 'speed',
             labelKey: 'player.speed',
-            showIf: (section) => section.enabled === true,
+            hintKey: 'player.speedHint',
+            showIf: showPlayer,
             options: SPEEDS.map((value) => ({ value, label: `${value}×` })),
           },
           {
             type: 'select',
             path: 'quality',
             labelKey: 'player.quality',
-            showIf: (section) => section.enabled === true,
+            hintKey: 'player.qualityHint',
+            showIf: showPlayer,
             options: () =>
               QUALITIES.map((value) => ({
                 value,
@@ -50,11 +62,18 @@ export function playerTab() {
                     : (QUALITY_LABELS[value] ?? `${value}p`),
               })),
           },
+        ],
+      },
+      {
+        titleKey: 'player.section.sound',
+        descKey: 'player.section.soundDesc',
+        showIf: showPlayer,
+        controls: [
           {
             type: 'switch',
             path: 'volumeEnabled',
             labelKey: 'player.volumeEnabled',
-            showIf: (section) => section.enabled === true,
+            hintKey: 'player.volumeEnabledHint',
           },
           {
             type: 'number',
@@ -63,42 +82,52 @@ export function playerTab() {
             min: 0,
             max: 100,
             step: 1,
-            showIf: (section) => section.enabled === true && section.volumeEnabled === true,
+            showIf: showVolume,
           },
           {
             type: 'switch',
             path: 'rememberVolume',
             labelKey: 'player.rememberVolume',
             hintKey: 'player.volumeHint',
-            showIf: (section) => section.enabled === true && section.volumeEnabled === true,
+            showIf: showVolume,
           },
+        ],
+      },
+      {
+        titleKey: 'player.section.behavior',
+        descKey: 'player.section.behaviorDesc',
+        showIf: showPlayer,
+        controls: [
           {
             type: 'switch',
             path: 'loop',
             labelKey: 'player.loop',
             hintKey: 'player.loopHint',
-            showIf: (section) => section.enabled === true,
           },
           {
             type: 'switch',
             path: 'resume',
             labelKey: 'player.resume',
             hintKey: 'player.resumeHint',
-            showIf: (section) => section.enabled === true,
           },
           {
             type: 'switch',
             path: 'pip',
             labelKey: 'player.pip',
             hintKey: 'player.pipHint',
-            showIf: (section) => section.enabled === true,
           },
+        ],
+      },
+      {
+        titleKey: 'player.section.keys',
+        descKey: 'player.section.keysDesc',
+        showIf: showPlayer,
+        controls: [
           {
             type: 'switch',
             path: 'hotkeys',
             labelKey: 'player.hotkeys',
             hintKey: 'player.hotkeysHint',
-            showIf: (section) => section.enabled === true,
           },
         ],
       },

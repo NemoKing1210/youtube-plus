@@ -7,6 +7,7 @@ import { el } from '../../../utils/dom.js';
 export const backupTab = {
   id: 'backup',
   titleKey: 'backup.title',
+  icon: 'download',
   render(ctx) {
     const root = el('div', 'yp-tab');
 

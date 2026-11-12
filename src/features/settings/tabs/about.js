@@ -6,6 +6,7 @@ import { el } from '../../../utils/dom.js';
 export const aboutTab = {
   id: 'about',
   titleKey: 'about.title',
+  icon: 'info',
   render() {
     const root = el('div', 'yp-tab');
     const section = el('section', 'yp-section');
