@@ -10,6 +10,6 @@
 }
 
 [data-yp-ui]:focus-visible {
-  outline: 2px solid var(--yp-accent);
+  outline: 2px solid var(--yp-primary);
   outline-offset: 2px;
 }
