@@ -11,6 +11,7 @@ import {
   createSwitch,
   createTextarea,
 } from './controls.js';
+import { setRevealed } from './reveal.js';
 
 const label = (key) => (key ? t(key) : '');
 
@@ -62,7 +63,7 @@ export function renderTab(tab, ctx) {
 
   function refresh() {
     for (const { node, showIf } of visibility) {
-      node.hidden = !showIf(section, ctx.draft);
+      setRevealed(node, Boolean(showIf(section, ctx.draft)));
     }
   }
 
@@ -141,25 +142,27 @@ export function renderTab(tab, ctx) {
     parent.append(node);
   }
 
-  for (const sectionSpec of tab.sections || []) {
-    const box = el('section', 'yp-section');
+  const sections = tab.sections || [];
+  sections.forEach((sectionSpec, index) => {
+    const box = el('section', 'yp-card');
     box.dataset.ypFind = `${tab.id}:${sectionSpec.titleKey ?? ''}`;
+    box.style.setProperty('--yp-card-index', String(Math.min(index, 4)));
     if (sectionSpec.titleKey) {
-      box.append(el('h3', 'yp-section__title', t(sectionSpec.titleKey)));
+      box.append(el('h3', 'yp-card__title', t(sectionSpec.titleKey)));
     }
-    if (sectionSpec.descKey) box.append(el('p', 'yp-section__desc', t(sectionSpec.descKey)));
+    if (sectionSpec.descKey) box.append(el('p', 'yp-card__desc', t(sectionSpec.descKey)));
     for (const spec of sectionSpec.controls || []) append(box, spec);
     if (sectionSpec.showIf) visibility.push({ node: box, showIf: sectionSpec.showIf });
     root.append(box);
-  }
+  });
 
   refresh();
   return { root, refresh };
 }
 
-/** Build a section node for custom renderers. */
+/** Build a card node for custom renderers. */
 export function createSection(title) {
-  const box = el('section', 'yp-section');
-  if (title) box.append(el('h3', 'yp-section__title', title));
+  const box = el('section', 'yp-card');
+  if (title) box.append(el('h3', 'yp-card__title', title));
   return box;
 }
