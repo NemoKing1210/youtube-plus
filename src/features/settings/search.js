@@ -14,11 +14,16 @@ export function matches(text, tokens) {
   return tokens.every((token) => haystack.includes(token));
 }
 
-function controlText(control) {
+function controlText(control, section) {
   const label = control.labelKey ? t(control.labelKey) : control.textKey ? t(control.textKey) : '';
   const hint = control.hintKey ? t(control.hintKey) : '';
+  const sectionDesc = section?.descKey ? t(section.descKey) : '';
   const options = typeof control.options === 'function' ? control.options() : control.options || [];
-  return { label, hint, text: [label, hint, ...options.map((option) => option.label ?? t(option.labelKey))].join(' ') };
+  return {
+    label,
+    hint,
+    text: [label, hint, sectionDesc, ...options.map((option) => option.label ?? t(option.labelKey))].join(' '),
+  };
 }
 
 /**
@@ -46,7 +51,7 @@ export function buildIndex(tabs) {
       const sectionTitle = section.titleKey ? t(section.titleKey) : '';
       const sectionId = `${tab.id}:${section.titleKey ?? ''}`;
       for (const control of section.controls || []) {
-        const { label, hint, text } = controlText(control);
+        const { label, hint, text } = controlText(control, section);
         if (!label) continue;
         index.push({
           kind: 'control',

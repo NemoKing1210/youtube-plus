@@ -36,3 +36,18 @@ test('buildIndex indexes textarea controls', () => {
   const index = buildIndex(tabs);
   assert.ok(index.some((entry) => entry.id === 'custom.selectors' && entry.label));
 });
+
+test('buildIndex indexes section descriptions', () => {
+  const tabs = [{
+    id: 't',
+    titleKey: 'player.title',
+    sections: [{
+      titleKey: 'player.section',
+      descKey: 'player.loopHint',
+      controls: [{ type: 'switch', path: 'loop', labelKey: 'player.loop' }],
+    }],
+  }];
+  const index = buildIndex(tabs);
+  assert.ok(searchIndex(index, 'current video').length > 0);
+  assert.equal(index[0].sectionTitle, 'Playback');
+});
