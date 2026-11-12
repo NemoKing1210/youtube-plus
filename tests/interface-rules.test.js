@@ -43,6 +43,37 @@ test('GROUPS lists the catalogue sections in display order', () => {
   ]);
 });
 
+test('interfaceTab adds the custom section after the rule groups', () => {
+  const tab = interfaceTab();
+  const index = tab.sections.findIndex((section) => section.titleKey === 'interface.custom.title');
+  assert.ok(index > 0);
+  const lastGroup = tab.sections.reduce(
+    (last, section, at) => (section.titleKey.startsWith('interface.group.') ? at : last),
+    -1,
+  );
+  assert.ok(index > lastGroup);
+
+  const section = tab.sections[index];
+  assert.equal(section.showIf({ enabled: false }), false);
+  assert.equal(section.showIf({ enabled: true }), true);
+
+  const toggle = section.controls.find((control) => control.path === 'custom.enabled');
+  assert.equal(toggle?.type, 'switch');
+  assert.equal(toggle?.labelKey, 'interface.custom.enabled');
+
+  const area = section.controls.find((control) => control.path === 'custom.selectors');
+  assert.equal(area?.type, 'textarea');
+  assert.equal(area?.labelKey, 'interface.custom.selectors');
+  assert.equal(area?.hintKey, 'interface.custom.selectorsHint');
+  assert.equal(area?.rows, 5);
+  assert.equal(area?.parse, 'list');
+  assert.equal(area?.showIf({ custom: { enabled: false } }), false);
+  assert.equal(area?.showIf({ custom: { enabled: true } }), true);
+
+  const warning = section.controls.find((control) => control.type === 'hint');
+  assert.equal(warning?.textKey, 'interface.custom.warning');
+});
+
 test('interfaceTab resolves hints: explicit, experimental fallback, then none', () => {
   const rules = [
     { group: 'nav', key: 'plain', css: ['x'] },

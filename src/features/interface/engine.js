@@ -2,6 +2,7 @@ import { Codes, logError } from '../../core/debug.js';
 import { SEL } from '../../core/constants.js';
 import { ensureStyle } from '../../utils/style.js';
 import { buildInterfaceCss } from './css.js';
+import { sanitizeSelectors } from './custom.js';
 import { RULES, ruleId } from './rules.js';
 
 /**
@@ -59,9 +60,17 @@ export function syncMarks(root, attr, id, matches) {
   return wanted;
 }
 
+function customSelectors() {
+  if (!config?.custom?.enabled) return [];
+  return sanitizeSelectors(config.custom.selectors);
+}
+
 function render() {
   if (!config) return;
-  const { css, previewSelectors } = buildInterfaceCss(RULES, config, { hoveredId });
+  const { css, previewSelectors } = buildInterfaceCss(RULES, config, {
+    hoveredId,
+    customSelectors: customSelectors(),
+  });
   ensureStyle(STYLE_ID).textContent = css;
 
   const strokes = previewSelectors.map((selector) => `${selector}{${OUTLINE}}`);

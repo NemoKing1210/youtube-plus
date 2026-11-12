@@ -13,6 +13,10 @@ export function interfaceFields(rules = RULES) {
   for (const [group, groupFields] of Object.entries(groups)) {
     fields[group] = field.record(groupFields);
   }
+  fields.custom = field.record({
+    enabled: field.bool(false),
+    selectors: field.list(field.string('', { maxLength: 300 }), { maxItems: 50 }),
+  });
   return fields;
 }
 
@@ -47,6 +51,24 @@ export function interfaceTab(rules = RULES) {
       })),
     });
   }
+
+  sections.push({
+    titleKey: 'interface.custom.title',
+    showIf: (section) => section.enabled === true,
+    controls: [
+      { type: 'switch', path: 'custom.enabled', labelKey: 'interface.custom.enabled' },
+      {
+        type: 'textarea',
+        path: 'custom.selectors',
+        labelKey: 'interface.custom.selectors',
+        hintKey: 'interface.custom.selectorsHint',
+        rows: 5,
+        parse: 'list',
+        showIf: (section) => section.custom?.enabled === true,
+      },
+      { type: 'hint', textKey: 'interface.custom.warning' },
+    ],
+  });
 
   return { id: 'interface', titleKey: 'interface.title', sections };
 }
