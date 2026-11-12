@@ -1,9 +1,12 @@
-import { SEL } from '../../core/constants.js';
+import { SEL, VOLUME_KEY } from '../../core/constants.js';
 import { Codes, logError, logInfo } from '../../core/debug.js';
+import { getValue, setValue } from '../../core/storage.js';
 import { ensurePipButton, removePipButton } from './pip.js';
 import { bindPlayerHotkeys, unbindPlayerHotkeys } from './hotkeys.js';
+import { applyLoop } from './loop.js';
 import { qualityLevel } from './quality.js';
 import { clearPosition, restorePosition, savePosition } from './resume.js';
+import { clampVolume, volumeFromPercent } from './volume.js';
 
 /**
  * Player lifecycle. YouTube reuses `#movie_player` across navigations, so all
@@ -14,15 +17,23 @@ import { clearPosition, restorePosition, savePosition } from './resume.js';
 const SAVE_EVERY_MS = 5000;
 const QUALITY_VERIFY_MS = 2000;
 const MAX_QUALITY_TRIES = 2;
+const VOLUME_SAVE_MS = 500;
 
 let cfg = null;
 let state = freshState();
 let boundVideo = null;
 let lastSave = 0;
 let qualityTimer = 0;
+let volumeTimer = 0;
 
 function freshState() {
-  return { videoId: null, speedApplied: false, qualityTries: 0, restoreAttempted: false };
+  return {
+    videoId: null,
+    speedApplied: false,
+    qualityTries: 0,
+    restoreAttempted: false,
+    volumeApplied: false,
+  };
 }
 
 const playerEl = () => document.querySelector(SEL.player);
@@ -90,6 +101,18 @@ function applyResume(player, video) {
   }
 }
 
+function applyVolume(video) {
+  if (!cfg?.volumeEnabled || state.volumeApplied) return;
+  const stored = cfg.rememberVolume ? getValue(VOLUME_KEY, null) : null;
+  const volume =
+    typeof stored === 'number' && Number.isFinite(stored)
+      ? clampVolume(stored)
+      : volumeFromPercent(cfg.volume);
+  video.volume = volume;
+  state.volumeApplied = true;
+  logInfo('player', 'volume applied', { videoId: state.videoId, volume });
+}
+
 /** Apply every per-video preference exactly once. */
 export function applyForVideo() {
   try {
@@ -118,6 +141,8 @@ function applyCurrentVideo() {
   applySpeed(player, video);
   applyQuality(player);
   applyResume(player, video);
+  applyVolume(video);
+  applyLoop(video, cfg.loop);
 }
 
 function onTimeUpdate() {
@@ -145,12 +170,23 @@ function onSeeked() {
   if (boundVideo.currentTime < 10) clearPosition(state.videoId);
 }
 
+function onVolumeChange() {
+  if (!cfg?.volumeEnabled || !cfg.rememberVolume || !boundVideo) return;
+  clearTimeout(volumeTimer);
+  volumeTimer = setTimeout(() => {
+    volumeTimer = 0;
+    if (!cfg?.volumeEnabled || !cfg.rememberVolume || !boundVideo) return;
+    setValue(VOLUME_KEY, boundVideo.volume);
+  }, VOLUME_SAVE_MS);
+}
+
 function unbindVideo() {
   if (!boundVideo) return;
   boundVideo.removeEventListener('loadedmetadata', applyForVideo);
   boundVideo.removeEventListener('timeupdate', onTimeUpdate);
   boundVideo.removeEventListener('seeked', onSeeked);
   boundVideo.removeEventListener('ended', onEnded);
+  boundVideo.removeEventListener('volumechange', onVolumeChange);
   boundVideo = null;
 }
 
@@ -162,6 +198,7 @@ function bindVideo(video) {
   video.addEventListener('timeupdate', onTimeUpdate);
   video.addEventListener('seeked', onSeeked);
   video.addEventListener('ended', onEnded);
+  video.addEventListener('volumechange', onVolumeChange);
 }
 
 export function resetPlayerState() {
@@ -172,10 +209,16 @@ export function resetPlayerState() {
 
 function teardown() {
   clearTimeout(qualityTimer);
+  clearTimeout(volumeTimer);
+  volumeTimer = 0;
   removePipButton();
   unbindPlayerHotkeys();
+  unbindVideo();
   const video = videoEl();
-  if (video) video.playbackRate = 1;
+  if (video) {
+    video.playbackRate = 1;
+    video.loop = false;
+  }
   resetPlayerState();
 }
 
@@ -190,6 +233,18 @@ export function applyPlayerSettings(next, prev) {
   if (prev && prev.speed !== next.speed) state.speedApplied = false;
   if (prev && prev.quality !== next.quality) state.qualityTries = 0;
   if (prev && prev.resume !== next.resume) state.restoreAttempted = false;
+  if (
+    prev &&
+    (prev.volumeEnabled !== next.volumeEnabled ||
+      prev.volume !== next.volume ||
+      prev.rememberVolume !== next.rememberVolume)
+  ) {
+    state.volumeApplied = false;
+  }
+  if (prev && prev.loop !== next.loop) {
+    const video = videoEl();
+    if (video) applyLoop(video, cfg.loop);
+  }
 
   if (cfg.pip) ensurePipButton();
   else removePipButton();

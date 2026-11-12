@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { stepSpeed } from '../src/features/player/speed.js';
 import { qualityLevel } from '../src/features/player/quality.js';
 import { shouldRestore, prunePositions, MAX_POSITIONS, TTL_MS } from '../src/features/player/positions.js';
+import { clampVolume, volumeFromPercent } from '../src/features/player/volume.js';
+import { applyLoop } from '../src/features/player/loop.js';
 
 test('stepSpeed moves by 0.25 and clamps', () => {
   assert.equal(stepSpeed(1, 0.25), 1.25);
@@ -32,6 +34,24 @@ test('shouldRestore uses the 10s / duration-15s window', () => {
   assert.equal(shouldRestore({ t: 85.1 }, 100), false);
   assert.equal(shouldRestore(null, 100), false);
   assert.equal(shouldRestore({ t: 10 }, NaN), false);
+});
+
+test('volume helpers clamp and convert percentages', () => {
+  assert.equal(volumeFromPercent(70), 0.7);
+  assert.equal(volumeFromPercent(150), 1);
+  assert.equal(volumeFromPercent(-5), 0);
+  assert.equal(volumeFromPercent('x'), 1);
+  assert.equal(clampVolume(0.4), 0.4);
+  assert.equal(clampVolume(NaN, 0.5), 0.5);
+});
+
+test('applyLoop sets the video loop flag', () => {
+  const video = { loop: false };
+  assert.equal(applyLoop(video, true), true);
+  assert.equal(video.loop, true);
+  assert.equal(applyLoop(video, false), true);
+  assert.equal(video.loop, false);
+  assert.equal(applyLoop(null, true), false);
 });
 
 test('prunePositions drops expired entries and keeps the newest 500', () => {

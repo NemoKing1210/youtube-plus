@@ -16,6 +16,7 @@ export const AUTHOR_URL = 'https://github.com/NemoKing1210';
 
 export const SETTINGS_KEY = 'yp_settings_v1';
 export const POSITIONS_KEY = 'yp_positions_v1';
+export const VOLUME_KEY = 'yp_volume_v1';
 
 /* ------------------------------------------------------------------ */
 /* DOM conventions                                                     */
