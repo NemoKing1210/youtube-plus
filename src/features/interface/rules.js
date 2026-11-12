@@ -21,6 +21,16 @@
 
 export const GROUPS = ['nav', 'feed', 'subscriptions', 'search', 'watch', 'channel', 'chrome'];
 
+/** Shorts shelves shared by feed rules (Task 8 wires them into `feed.shorts`). */
+export const SHORTS_SELECTORS = [
+  'ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts])',
+  'ytd-reel-shelf-renderer',
+  'grid-shelf-view-model:has(a[href^="/shorts/"])',
+  'shorts-lockup-view-model:has(a[href^="/shorts/"])',
+  'ytd-video-renderer:has(ytd-thumbnail-overlay-time-status-renderer[overlay-style="SHORTS"])',
+  'ytd-rich-item-renderer:has(a[href^="/shorts/"])',
+];
+
 export const RULES = [
   {
     group: 'feed',
@@ -38,20 +48,104 @@ export const RULES = [
     on: true,
     hint: true,
     css: [
-      'ytd-guide-entry-renderer:has(a[title="Shorts"])',
-      'ytd-mini-guide-entry-renderer:has(a[title="Shorts"])',
+      'ytd-guide-entry-renderer:has(a[href="/shorts"], a[href^="/shorts/"])',
+      'ytd-mini-guide-entry-renderer:has(a[href="/shorts"], a[href^="/shorts/"])',
     ],
   },
   {
     group: 'nav',
     key: 'premium',
     css: [
-      'a#endpoint[href="/premium"]',
-      'a#endpoint[href^="https://music.youtube.com"]',
-      'a#endpoint[href^="https://www.youtubekids.com"]',
-      'a#endpoint[href^="/feed/storefront"]',
+      'ytd-guide-entry-renderer:has(a#endpoint[href="/premium"])',
+      'ytd-guide-entry-renderer:has(a#endpoint[href^="https://music.youtube.com"])',
+      'ytd-guide-entry-renderer:has(a#endpoint[href^="https://www.youtubekids.com"])',
+      'ytd-guide-entry-renderer:has(a#endpoint[href^="/feed/storefront"])',
+      'ytd-mini-guide-entry-renderer:has(a[href="/premium"])',
+      'ytd-mini-guide-entry-renderer:has(a[href^="https://music.youtube.com"])',
+      'ytd-mini-guide-entry-renderer:has(a[href^="https://www.youtubekids.com"])',
+      'ytd-mini-guide-entry-renderer:has(a[href^="/feed/storefront"])',
     ],
   },
+  {
+    group: 'nav',
+    key: 'home',
+    css: [
+      'ytd-guide-entry-renderer:has(a#endpoint[href="/"])',
+      'ytd-mini-guide-entry-renderer:has(a[href="/"])',
+    ],
+  },
+  {
+    group: 'nav',
+    key: 'subscriptions',
+    css: [
+      'ytd-guide-entry-renderer:has(a#endpoint[href="/feed/subscriptions"])',
+      'ytd-mini-guide-entry-renderer:has(a[href="/feed/subscriptions"])',
+    ],
+  },
+  {
+    group: 'nav',
+    key: 'history',
+    css: [
+      'ytd-guide-entry-renderer:has(a#endpoint[href="/feed/history"])',
+      'ytd-mini-guide-entry-renderer:has(a[href="/feed/history"])',
+    ],
+  },
+  {
+    group: 'nav',
+    key: 'playlists',
+    css: [
+      'ytd-guide-entry-renderer:has(a#endpoint[href="/feed/playlists"])',
+      'ytd-mini-guide-entry-renderer:has(a[href="/feed/playlists"])',
+    ],
+  },
+  {
+    group: 'nav',
+    key: 'watchLater',
+    css: [
+      'ytd-guide-entry-renderer:has(a#endpoint[href*="list=WL"])',
+      'ytd-mini-guide-entry-renderer:has(a[href*="list=WL"])',
+    ],
+  },
+  {
+    group: 'nav',
+    key: 'liked',
+    css: [
+      'ytd-guide-entry-renderer:has(a#endpoint[href*="list=LL"])',
+      'ytd-mini-guide-entry-renderer:has(a[href*="list=LL"])',
+    ],
+  },
+  {
+    group: 'nav',
+    key: 'downloads',
+    css: [
+      'ytd-guide-entry-renderer:has(a#endpoint[href="/feed/downloads"])',
+      'ytd-mini-guide-entry-renderer:has(a[href="/feed/downloads"])',
+    ],
+  },
+  {
+    group: 'nav',
+    key: 'explore',
+    css: [
+      'ytd-guide-entry-renderer:has(a#endpoint[href="/feed/explore"])',
+      'ytd-guide-entry-renderer:has(a#endpoint[href="/feed/trending"])',
+      'ytd-guide-entry-renderer:has(a#endpoint[href="/feed/music"])',
+      'ytd-guide-entry-renderer:has(a#endpoint[href="/feed/shopping"])',
+      'ytd-mini-guide-entry-renderer:has(a[href="/feed/explore"])',
+      'ytd-mini-guide-entry-renderer:has(a[href="/feed/trending"])',
+      'ytd-mini-guide-entry-renderer:has(a[href="/feed/music"])',
+      'ytd-mini-guide-entry-renderer:has(a[href="/feed/shopping"])',
+    ],
+  },
+  {
+    group: 'nav',
+    key: 'moreFromYouTube',
+    css: [
+      'ytd-guide-section-renderer:has(a#endpoint[href="/premium"])',
+      'ytd-guide-section-renderer:has(a#endpoint[href^="https://music.youtube.com"])',
+      'ytd-guide-section-renderer:has(a#endpoint[href^="https://www.youtubekids.com"])',
+    ],
+  },
+  { group: 'nav', key: 'footer', css: ['ytd-guide-renderer #footer'] },
   { group: 'watch', key: 'related', css: ['#secondary-inner #related'] },
   { group: 'watch', key: 'comments', css: ['ytd-comments#comments'] },
   { group: 'watch', key: 'chat', css: ['#chat-container'] },

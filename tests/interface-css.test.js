@@ -6,7 +6,20 @@ import { buildInterfaceCss } from '../src/features/interface/css.js';
 const config = (overrides = {}) => ({
   enabled: true,
   feed: { shorts: true },
-  nav: { shorts: true, premium: false },
+  nav: {
+    shorts: true,
+    premium: false,
+    home: false,
+    subscriptions: false,
+    history: false,
+    playlists: false,
+    watchLater: false,
+    liked: false,
+    downloads: false,
+    explore: false,
+    moreFromYouTube: false,
+    footer: false,
+  },
   watch: { related: false, comments: false, chat: false, merch: false },
   chrome: { endCards: false, cards: false },
   ...overrides,
@@ -15,7 +28,7 @@ const config = (overrides = {}) => ({
 test('defaults hide both Shorts rules only', () => {
   const { css } = buildInterfaceCss(RULES, config());
   assert.match(css, /grid-shelf-view-model:has\(ytm-shorts-lockup-view-model\)/);
-  assert.match(css, /ytd-guide-entry-renderer:has\(a\[title="Shorts"\]\)/);
+  assert.match(css, /ytd-guide-entry-renderer:has\(a\[href="\/shorts"\]/);
   assert.doesNotMatch(css, /#secondary-inner #related/);
   assert.doesNotMatch(css, /ytd-comments#comments/);
 });
@@ -45,4 +58,34 @@ test('a previewed rule is returned even when it is off', () => {
   );
   assert.equal(css, '');
   assert.deepEqual(previewSelectors, ['ytd-comments#comments']);
+});
+
+const navAll = {
+  shorts: true,
+  premium: true,
+  home: true,
+  subscriptions: true,
+  history: true,
+  playlists: true,
+  watchLater: true,
+  liked: true,
+  downloads: true,
+  explore: true,
+  moreFromYouTube: true,
+  footer: true,
+};
+
+test('guide rules match by href instead of localized titles', () => {
+  const { css } = buildInterfaceCss(RULES, config({ nav: navAll }));
+  assert.match(css, /ytd-guide-entry-renderer:has\(a\[href="\/shorts"\]/);
+  assert.match(css, /a#endpoint\[href="\/feed\/history"\]/);
+  assert.match(css, /a#endpoint\[href\*="list=WL"\]/);
+  assert.match(css, /a#endpoint\[href\*="list=LL"\]/);
+  assert.match(css, /ytd-guide-renderer #footer/);
+});
+
+test('guide entries are off by default except shorts', () => {
+  const { css } = buildInterfaceCss(RULES, config());
+  assert.doesNotMatch(css, /a#endpoint\[href="\/feed\/history"\]/);
+  assert.doesNotMatch(css, /a#endpoint\[href="\/"\]/);
 });
