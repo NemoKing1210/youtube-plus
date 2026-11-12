@@ -76,6 +76,7 @@ async function dynamicKeys() {
   if (existsSync(rulesPath)) {
     const rules = await import(pathToFileURL(rulesPath).href);
     for (const group of rules.GROUPS) keys.add(`interface.group.${group}`);
+    for (const group of rules.GROUPS) keys.add(`interface.group.${group}Desc`);
     for (const rule of rules.RULES) {
       const key = rules.ruleLabelKey(rule);
       keys.add(key);
