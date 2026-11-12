@@ -1,6 +1,9 @@
 import { REPO_URL, SCRIPT_NAME, SCRIPT_VERSION } from '../../../core/constants.js';
 import { t } from '../../../i18n/index.js';
+import { iconNode } from '../../../ui/icons.js';
 import { el } from '../../../utils/dom.js';
+import { createHint } from '../controls.js';
+import { createSection } from '../renderer.js';
 
 /** About tab: identity, version, repository and the non-affiliation note. */
 export const aboutTab = {
@@ -9,12 +12,19 @@ export const aboutTab = {
   icon: 'info',
   render() {
     const root = el('div', 'yp-tab');
-    const section = el('section', 'yp-section');
 
-    section.append(
-      el('h3', 'yp-section__title', SCRIPT_NAME),
-      el('p', 'yp-section__desc', t('about.description')),
+    const hero = el('section', 'yp-about');
+    const mark = el('div', 'yp-about__mark');
+    mark.append(iconNode('settings', 28));
+    const text = el('div', 'yp-about__text');
+    text.append(
+      el('h3', 'yp-about__name', SCRIPT_NAME),
+      el('p', 'yp-about__desc', t('about.description')),
+      el('span', 'yp-about__version', `v${SCRIPT_VERSION}`),
     );
+    hero.append(mark, text);
+
+    const card = createSection(t('about.section.details'));
 
     const version = el('div', 'yp-row');
     version.append(
@@ -35,8 +45,8 @@ export const aboutTab = {
       el('span', 'yp-row__value', 'MIT'),
     );
 
-    section.append(version, repo, license, el('p', 'yp-hint', t('about.disclaimer')));
-    root.append(section);
+    card.append(version, repo, license, createHint(t('about.disclaimer')));
+    root.append(hero, card);
     return root;
   },
 };
