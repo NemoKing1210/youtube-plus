@@ -66,7 +66,10 @@ Manual checklist:
    `src/features/interface/custom.js`; invalid input must never break the
    stylesheet or the settings dialog.
 8. Volume/loop: enable the volume setting and confirm `video.volume` matches
-   the configured percentage; enable loop and confirm `video.loop === true`.
+   the configured percentage. With **Remember volume** on, a volume set by
+   hand is restored on the next video (the configured percentage applies
+   until then); with memory off the configured percentage always applies.
+   Enable loop and confirm `video.loop === true`.
 9. Save/reload: settings survive a reload; open with `?corrupt=1` and confirm
    the old/invalid blob does not crash the script.
 

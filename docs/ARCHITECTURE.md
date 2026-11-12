@@ -174,6 +174,8 @@ true.
   match and removes it from elements that no longer match, preserving other
   rules' ids in the same attribute. `runFind` visits every `find` rule on each
   scan and navigation, so a stale mark is cleared when an item stops matching.
+  Find passes ride the shared scan debounce (`SCAN_DEBOUNCE_MS`); there is no
+  separate throttle.
 
 Hovering a rule's switch (the renderer emits `interface:preview`) excludes
 that rule from the sheet and returns its selectors so they can be outlined
@@ -188,6 +190,9 @@ limits: an entry is rejected when it is empty, longer than 300 characters, or
 contains `{`, `}`, `;`, `@`, a newline, a backslash or a CSS comment delimiter
 (`/*`, `*/`); duplicates are dropped. `css.js` sanitizes again before
 generating the stylesheet (defense in depth), so raw input never reaches CSS.
+The sanitizer blocks CSS/HTML breakout but does not validate selector grammar,
+so a malformed custom selector is dropped or can affect that rule only; no
+injection is possible.
 
 ## Layout feature
 
@@ -213,9 +218,11 @@ the speed setting re-applies it deliberately.
 
 Volume is opt-in (`volumeEnabled`): the configured percentage is applied
 unless `rememberVolume` finds a value saved from the user's last manual
-change. `volumechange` writes that value at most every 500 ms, and a pending
-save is cancelled when the `<video>` element is swapped, so a stale default
-volume is never persisted. `timeupdate` saves the resume position at most
+change. The programmatic assignment records the applied value and suppresses
+its own `volumechange`, so it never overwrites that memory; only a genuine
+change writes the new value (at most every 500 ms). A pending save is
+cancelled when the `<video>` element is swapped, so a stale default volume is
+never persisted. `timeupdate` saves the resume position at most
 every 5 s; entries expire after 90 days and are capped at 500. The PiP button
 mirrors the browser's `enterpictureinpicture` /
 `leavepictureinpicture` events. Disabling the feature removes the button,

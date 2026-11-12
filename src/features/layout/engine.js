@@ -25,7 +25,7 @@ function render() {
   try {
     const style = ensureStyle(STYLE_ID);
     if (!cfg?.enabled) {
-      style.textContent = '';
+      if (style.textContent) style.textContent = '';
       return;
     }
     const widths = {
@@ -33,7 +33,8 @@ function render() {
       subscriptions: widthOf('subscriptions'),
       channel: widthOf('channel'),
     };
-    style.textContent = buildLayoutCss(cfg, computeColumns(cfg, widths));
+    const css = buildLayoutCss(cfg, computeColumns(cfg, widths));
+    if (style.textContent !== css) style.textContent = css;
   } catch (error) {
     logError(Codes.LAYOUT_APPLY, 'layout render failed', { error });
   }

@@ -14,14 +14,12 @@ import { RULES, ruleId } from './rules.js';
 const STYLE_ID = 'yp-interface-style';
 const PREVIEW_ID = 'yp-interface-preview';
 const OUTLINE = 'outline:2px solid var(--yp-accent)!important;outline-offset:-2px!important';
-const PAGE_INTERVAL_MS = 120;
 
 export const MARK_ATTR = 'data-yp-hide';
 export const PREVIEW_ATTR = 'data-yp-preview';
 
 let config = null;
 let hoveredId = null;
-let pageTimer = 0;
 
 /** Add the rule id to a space-separated id list, preserving other marks. */
 function addMark(node, attr, id) {
@@ -121,8 +119,7 @@ function mark(rule, root, preview) {
 
 /**
  * Page-level pass for `find` rules. Every rule is visited so stale marks are
- * cleared. Throttled so YouTube's DOM churn cannot starve it; scoped to the
- * active page manager.
+ * cleared. Rides the shared scan debounce; scoped to the active page manager.
  */
 export function runFind(root = document) {
   if (!config) return;
@@ -130,12 +127,4 @@ export function runFind(root = document) {
   if (!findRules.length) return;
   const scope = root.querySelector?.(SEL.pageManager) || root;
   for (const rule of findRules) mark(rule, scope, ruleId(rule) === hoveredId);
-}
-
-export function scheduleFind() {
-  if (pageTimer) return;
-  pageTimer = setTimeout(() => {
-    pageTimer = 0;
-    runFind(document);
-  }, PAGE_INTERVAL_MS);
 }

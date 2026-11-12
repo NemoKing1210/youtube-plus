@@ -6,7 +6,7 @@ import { bindPlayerHotkeys, unbindPlayerHotkeys } from './hotkeys.js';
 import { applyLoop } from './loop.js';
 import { qualityLevel } from './quality.js';
 import { clearPosition, restorePosition, savePosition } from './resume.js';
-import { clampVolume, volumeFromPercent } from './volume.js';
+import { clampVolume, shouldPersistVolume, volumeFromPercent } from './volume.js';
 
 /**
  * Player lifecycle. YouTube reuses `#movie_player` across navigations, so all
@@ -25,6 +25,9 @@ let boundVideo = null;
 let lastSave = 0;
 let qualityTimer = 0;
 let volumeTimer = 0;
+// Value we assigned to the element ourselves; its `volumechange` must not be
+// mistaken for a hand-set volume and persisted.
+let suppressedVolume = null;
 
 function freshState() {
   return {
@@ -108,8 +111,12 @@ function applyVolume(video) {
     typeof stored === 'number' && Number.isFinite(stored)
       ? clampVolume(stored)
       : volumeFromPercent(cfg.volume);
-  video.volume = volume;
   state.volumeApplied = true;
+  // Assigning the current value fires no event, and there is nothing to
+  // suppress; assigning a new one makes the matching `volumechange` ours.
+  if (video.volume === volume) return;
+  suppressedVolume = volume;
+  video.volume = volume;
   logInfo('player', 'volume applied', { videoId: state.videoId, volume });
 }
 
@@ -177,12 +184,25 @@ function onSeeked() {
 }
 
 function onVolumeChange() {
-  if (!cfg?.volumeEnabled || !cfg.rememberVolume || !boundVideo) return;
+  // Consume the one-shot suppression: the first event after our assignment is
+  // the programmatic one; anything later is a genuine change.
+  const applied = suppressedVolume;
+  suppressedVolume = null;
+  clearTimeout(volumeTimer);
+  volumeTimer = 0;
+
+  const video = boundVideo;
+  if (!video) return;
+  const persist = shouldPersistVolume({
+    applied,
+    current: video.volume,
+    volumeEnabled: cfg?.volumeEnabled === true,
+    rememberVolume: cfg?.rememberVolume === true,
+  });
+  if (!persist) return;
   // Capture the element that produced this change: if YouTube swaps the
   // <video> before the throttle fires, the save must be dropped rather than
   // persisting the replacement element's default volume.
-  const video = boundVideo;
-  clearTimeout(volumeTimer);
   volumeTimer = setTimeout(() => {
     volumeTimer = 0;
     if (!cfg?.volumeEnabled || !cfg.rememberVolume || boundVideo !== video) return;
@@ -195,6 +215,7 @@ function unbindVideo() {
   // unbind/teardown never leaves a callback that could write stale state.
   clearTimeout(volumeTimer);
   volumeTimer = 0;
+  suppressedVolume = null;
   if (!boundVideo) return;
   boundVideo.removeEventListener('loadedmetadata', applyForVideo);
   boundVideo.removeEventListener('timeupdate', onTimeUpdate);

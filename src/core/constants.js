@@ -52,8 +52,6 @@ export const SEL = Object.freeze({
   pageManager: '#page-manager',
   masthead: 'ytd-masthead',
   guide: 'ytd-guide-renderer',
-  guideEntry: 'ytd-guide-entry-renderer',
-  miniGuideEntry: 'ytd-mini-guide-entry-renderer',
   watchMeta: 'ytd-watch-metadata',
   secondaryInner: '#secondary-inner',
   related: '#secondary-inner #related',
@@ -62,5 +60,4 @@ export const SEL = Object.freeze({
   player: '#movie_player',
   video: '#movie_player video',
   rightControls: '.ytp-right-controls',
-  shortsShelf: 'grid-shelf-view-model:has(ytm-shorts-lockup-view-model)',
 });

@@ -37,16 +37,17 @@ by the page they affect:
   Subscriptions, History, Playlists, Watch Later, Liked videos, Downloads,
   Explore (including Trending, Music and Shopping), the "More from YouTube"
   section and the footer.
-- **Home**: Shorts shelves and Shorts cards (on by default), posts, live,
-  upcoming, watched videos, mixes and the filter chips.
+- **Home**: Shorts shelves and Shorts cards (on by default; this rule is
+  global, so it also hides Shorts results in Search), posts, live, upcoming,
+  watched videos, mixes and the filter chips.
 - **Subscriptions**: the "Most relevant" shelf (experimental), watched
   videos, live, upcoming and mixes.
 - **Search**: shelves, watched videos, live and upcoming results.
 - **Watch**: related videos, comments, live chat, merch and products, the
-  playlist panel, description, actions, transcript and the pause overlay.
+  playlist panel, description, actions and transcript.
 - **Channel**: the Shorts tab (experimental), posts, the trailer and live or
   upcoming items.
-- **Player**: end-screen suggestions and info cards.
+- **Player**: end-screen suggestions, info cards and the pause overlay.
 
 Hover a switch to preview its effect: the rule is lifted and its targets are
 outlined on the page behind the dialog.
@@ -65,8 +66,9 @@ outlined on the page behind the dialog.
 
 - **Preferred quality** up to 4320p (8K), capped by what YouTube offers;
   applied once, verified once, retried at most once
-- **Volume**: an optional target volume, and optional memory of the last
-  volume you set by hand
+- **Volume**: an optional target volume. With **Remember volume** on, the last
+  volume you set by hand is restored; until then (and always with memory off)
+  the configured percentage applies
 - **Loop** the current video
 - **Default speed** (0.25×–2×) applied when a video starts
 - **Remember position** (opt-in): resumes where you stopped, 10 s to 15 s

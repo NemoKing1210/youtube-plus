@@ -3,7 +3,11 @@ import assert from 'node:assert/strict';
 import { stepSpeed } from '../src/features/player/speed.js';
 import { qualityLevel } from '../src/features/player/quality.js';
 import { shouldRestore, prunePositions, MAX_POSITIONS, TTL_MS } from '../src/features/player/positions.js';
-import { clampVolume, volumeFromPercent } from '../src/features/player/volume.js';
+import {
+  clampVolume,
+  shouldPersistVolume,
+  volumeFromPercent,
+} from '../src/features/player/volume.js';
 import { applyLoop } from '../src/features/player/loop.js';
 
 test('stepSpeed moves by 0.25 and clamps', () => {
@@ -43,6 +47,28 @@ test('volume helpers clamp and convert percentages', () => {
   assert.equal(volumeFromPercent('x'), 1);
   assert.equal(clampVolume(0.4), 0.4);
   assert.equal(clampVolume(NaN, 0.5), 0.5);
+});
+
+test('shouldPersistVolume keeps manual changes and drops programmatic ones', () => {
+  const base = { volumeEnabled: true, rememberVolume: true };
+  // The assignment we made ourselves is not a user action.
+  assert.equal(shouldPersistVolume({ ...base, applied: 0.7, current: 0.7 }), false);
+  assert.equal(shouldPersistVolume({ ...base, applied: 0, current: 0 }), false);
+  // A different value is a genuine change and must be saved.
+  assert.equal(shouldPersistVolume({ ...base, applied: 0.7, current: 0.5 }), true);
+  assert.equal(shouldPersistVolume({ ...base, applied: null, current: 0.5 }), true);
+  assert.equal(shouldPersistVolume({ ...base, applied: undefined, current: 0 }), true);
+  // Without an applied value every finite change is manual.
+  assert.equal(shouldPersistVolume({ ...base, applied: null, current: NaN }), false);
+  // The feature and the memory switch gate persistence.
+  assert.equal(
+    shouldPersistVolume({ ...base, rememberVolume: false, applied: null, current: 0.5 }),
+    false,
+  );
+  assert.equal(
+    shouldPersistVolume({ ...base, volumeEnabled: false, applied: null, current: 0.5 }),
+    false,
+  );
 });
 
 test('applyLoop sets the video loop flag', () => {
