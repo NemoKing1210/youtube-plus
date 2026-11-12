@@ -2,7 +2,8 @@ import { field } from '../../core/schema.js';
 import { t } from '../../i18n/index.js';
 
 export const SPEEDS = ['0.25', '0.5', '0.75', '1', '1.25', '1.5', '1.75', '2'];
-export const QUALITIES = ['auto', '1080', '720', '480', '360', '240'];
+export const QUALITIES = ['auto', '4320', '2160', '1440', '1080', '720', '480', '360', '240', '144'];
+const QUALITY_LABELS = { 4320: '4320p (8K)', 2160: '2160p (4K)' };
 
 export function playerFields() {
   return {
@@ -39,7 +40,10 @@ export function playerTab() {
             options: () =>
               QUALITIES.map((value) => ({
                 value,
-                label: value === 'auto' ? t('player.qualityAuto') : `${value}p`,
+                label:
+                  value === 'auto'
+                    ? t('player.qualityAuto')
+                    : (QUALITY_LABELS[value] ?? `${value}p`),
               })),
           },
           {

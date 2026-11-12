@@ -18,6 +18,13 @@ test('qualityLevel maps preferences', () => {
   assert.equal(qualityLevel('unknown'), null);
 });
 
+test('qualityLevel maps 4K and 8K preferences', () => {
+  assert.equal(qualityLevel('4320'), 'highres');
+  assert.equal(qualityLevel('2160'), 'hd2160');
+  assert.equal(qualityLevel('1440'), 'hd1440');
+  assert.equal(qualityLevel('144'), 'tiny');
+});
+
 test('shouldRestore uses the 10s / duration-15s window', () => {
   assert.equal(shouldRestore({ t: 10 }, 100), true);
   assert.equal(shouldRestore({ t: 9.9 }, 100), false);
