@@ -114,6 +114,17 @@ Architecture and feature recipes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 Development loop and selector verification:
 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
+## Contributing
+
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for setup,
+conventions and the pull-request checklist; the task backlog is in
+[TODO.md](TODO.md).
+
+## Security
+
+Report vulnerabilities privately — see [SECURITY.md](SECURITY.md). Do not open
+a public issue for a security problem.
+
 ## License
 
 [MIT](LICENSE)

@@ -13,8 +13,9 @@ managers. The sibling `x-plus` project is the architectural reference.
 - Version source of truth: `package.json`
 - Generated install artifacts (committed): `youtube-plus.user.js`,
   `youtube-plus.meta.js` — produced only by `npm run build`; never hand-edit
-- Docs: `README.md`, `CHANGELOG.md` (Keep a Changelog + SemVer),
-  `docs/ARCHITECTURE.md`, `docs/DEVELOPMENT.md`
+- Docs: `README.md`, `CHANGELOG.md` (Keep a Changelog + SemVer), `TODO.md`
+  (task backlog), `CONTRIBUTING.md`, `SECURITY.md`, `docs/ARCHITECTURE.md`,
+  `docs/DEVELOPMENT.md`
 - License: MIT
 
 ## Architecture in one paragraph
@@ -80,6 +81,46 @@ recipes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
   problems also get a toast.
 - Do not cancel YouTube's events, patch its router, or imply affiliation with
   YouTube or Google.
+
+## Tasks
+
+`TODO.md` is the task backlog: one self-contained task per entry, with
+acceptance criteria and a verification step. Unless the user asks for
+something specific, start by reading it and pick the highest-priority
+unblocked task.
+
+**Write tasks like plans.** A `TODO.md` entry must carry enough context to be
+executed days later without re-discovering it. Describe the problem and the
+current behaviour, the intended approach (and alternatives you rejected), the
+modules and files involved, the ordered implementation steps, edge cases, and
+the tests or manual checks that prove it. A vague one-line reminder is not a
+task: treat every entry as a mini-plan, and the plan written before execution
+as its continuation.
+
+**Plan before executing.** Do not edit code until a plan exists. Read the
+relevant docs and current code first, then write down:
+
+- the files to change and the ordered steps;
+- the tests to add or update and the commands that prove the change;
+- risks, rollback and anything explicitly out of scope.
+
+Keep the plan in the task entry (or in a plan file linked from it). Confirm it
+with the user first when scope, approach or a public behaviour is ambiguous; a
+one-line fix may use a short inline checklist instead.
+
+**Execute and close out.**
+
+1. Move the task to `In progress` and make one logical change at a time; run
+   the focused tests after each step (`npm test`).
+2. Stay inside the task's scope. File newly discovered work as a separate task
+   instead of expanding the current one.
+3. Tick acceptance criteria only when they are actually verified. If a
+   dependency or an external check is missing, set `Blocked` and name it
+   instead of guessing.
+4. Definition of done: every criterion met, `npm test && npm run ci` passes,
+   user-facing strings exist in all locales, docs and `CHANGELOG.md` are
+   updated when the change is user-visible, artifacts are rebuilt
+   (`npm run build`), and the task is moved to `Done` with its completion date.
 
 ## Localization
 
