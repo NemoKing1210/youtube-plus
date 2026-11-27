@@ -27,8 +27,11 @@ theme, storage, http, debug) runs independent **features**
 `fields` (declarative schema) define defaults, normalization and the settings
 UI, `tabs` are rendered by the shared spec renderer. The current features are
 `general` (language, guide row, hotkey), `interface` (hiding rules),
-`layout` (rich-grid columns and cards), `player` and `settings`. Details and
-recipes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+`layout` (rich-grid columns and cards), `dislikes`, `player`, `shorts`,
+`commentKit` and `settings`. Comment Kit reads content loaded by YouTube
+locally and adds no grants or hosts. Dislikes is opt-in and uses only
+`returnyoutubedislikeapi.com` for its anonymous requests. See
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Conventions
 

@@ -25,9 +25,11 @@
 // @tag                userscript
 // @tag                cleanup
 // @tag                player
+// @connect            returnyoutubedislikeapi.com
 // @grant              GM_getValue
 // @grant              GM_registerMenuCommand
 // @grant              GM_setValue
+// @grant              GM_xmlhttpRequest
 // @run-at             document-start
 // @noframes
 // ==/UserScript==

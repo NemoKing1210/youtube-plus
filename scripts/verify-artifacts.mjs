@@ -25,11 +25,16 @@ for (const name of ARTIFACT_FILES) {
   console.log(`ok  dist ↔ root  ${name}`);
 }
 
-const EXPECTED_GRANTS = ['GM_getValue', 'GM_registerMenuCommand', 'GM_setValue'];
+const EXPECTED_GRANTS = ['GM_getValue', 'GM_registerMenuCommand', 'GM_setValue', 'GM_xmlhttpRequest'];
+const EXPECTED_CONNECT = ['returnyoutubedislikeapi.com'];
 const meta = readFileSync(join(root, 'youtube-plus.meta.js'), 'utf8');
-const grants = [...meta.matchAll(/^\/\/ @grant\s+(\S+)/gm)].map((match) => match[1]).sort();
-if (JSON.stringify(grants) !== JSON.stringify(EXPECTED_GRANTS)) {
-  console.error(`verify-artifacts: unexpected grants: ${grants.join(', ') || 'none'}`);
-  process.exit(1);
+
+for (const [key, expected] of [['grant', EXPECTED_GRANTS], ['connect', EXPECTED_CONNECT]]) {
+  const values = [...meta.matchAll(new RegExp(`^// @${key}\\s+(\\S+)`, 'gm'))]
+    .map((match) => match[1]).sort();
+  if (JSON.stringify(values) !== JSON.stringify(expected)) {
+    console.error(`verify-artifacts: unexpected @${key}: ${values.join(', ') || 'none'}`);
+    process.exit(1);
+  }
+  console.log(`ok  ${key.padEnd(12)} ${values.length}/${expected.length} expected`);
 }
-console.log('ok  grants      3/3 expected');

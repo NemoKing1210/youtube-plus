@@ -8,13 +8,20 @@ import { el } from '../../utils/dom.js';
  */
 export function confirmDialog({ title, message, confirmLabel, danger = false }) {
   return new Promise((resolve) => {
+    const previousFocus = document.activeElement;
     const overlay = el('div', 'yp-confirm-overlay');
     overlay.setAttribute('role', 'presentation');
 
     const dialog = el('div', 'yp-confirm');
     dialog.setAttribute('role', 'alertdialog');
     dialog.setAttribute('aria-modal', 'true');
-    dialog.append(el('h3', 'yp-confirm__title', title), el('p', 'yp-confirm__text', message));
+    const heading = el('h3', 'yp-confirm__title', title);
+    heading.id = 'yp-confirm-title';
+    const description = el('p', 'yp-confirm__text', message);
+    description.id = 'yp-confirm-description';
+    dialog.setAttribute('aria-labelledby', heading.id);
+    dialog.setAttribute('aria-describedby', description.id);
+    dialog.append(heading, description);
 
     const actions = el('div', 'yp-confirm__actions');
     const cancel = el('button', 'yp-btn-ui yp-btn-ui--tonal', t('common.cancel'));
@@ -29,12 +36,16 @@ export function confirmDialog({ title, message, confirmLabel, danger = false }) 
     const finish = (value) => {
       document.removeEventListener('keydown', onKey, true);
       overlay.remove();
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
       resolve(value);
     };
     const onKey = (event) => {
       if (event.key === 'Escape') {
         event.stopPropagation();
         finish(false);
+      } else if (event.key === 'Tab') {
+        event.preventDefault();
+        (document.activeElement === cancel ? confirm : cancel).focus();
       }
     };
 
@@ -44,6 +55,6 @@ export function confirmDialog({ title, message, confirmLabel, danger = false }) 
       if (event.target === overlay) finish(false);
     });
     document.addEventListener('keydown', onKey, true);
-    confirm.focus();
+    cancel.focus();
   });
 }

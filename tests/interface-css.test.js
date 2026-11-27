@@ -110,6 +110,11 @@ test('guide rules match by href instead of localized titles', () => {
   assert.match(css, /ytd-guide-renderer #footer/);
 });
 
+test('the desktop Shorts guide entry can be hidden when it has no href', () => {
+  const { css } = buildInterfaceCss(RULES, config());
+  assert.ok(css.includes('ytd-guide-entry-renderer:has(a#endpoint[title="Shorts"]:not([href]))'));
+});
+
 test('guide entries are off by default except shorts', () => {
   const { css } = buildInterfaceCss(RULES, config());
   assert.doesNotMatch(css, /a#endpoint\[href="\/feed\/history"\]/);

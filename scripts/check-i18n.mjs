@@ -8,6 +8,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { TOAST_POSITIONS } from '../src/core/constants.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const src = join(root, 'src');
@@ -24,6 +25,9 @@ const NAMESPACES = [
   'interface',
   'player',
   'layout',
+  'shorts',
+  'dislikes',
+  'commentKit',
 ];
 
 function* walk(dir) {
@@ -67,7 +71,7 @@ function usedKeys(en) {
 /** Keys built from data at runtime (see the generators in the feature files). */
 async function dynamicKeys() {
   const keys = new Set();
-  for (const position of ['top-right', 'top-left', 'bottom-right', 'bottom-left']) {
+  for (const position of TOAST_POSITIONS) {
     keys.add(`general.toastPosition.${position}`);
   }
   for (const level of ['success', 'info', 'warning', 'error']) keys.add(`toast.title.${level}`);

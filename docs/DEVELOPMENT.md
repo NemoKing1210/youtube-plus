@@ -41,6 +41,29 @@ case).
 
 Manual checklist:
 
+Open settings from the **YouTube Plus** row in the expanded guide. Check the
+gear and label in both themes, and activate the row with a mouse, Enter and
+Space. Replace the guide or load it late with `?late-guide=1` and verify
+only one button renders. Toggle the guide button and shortcut hint in General.
+
+For settings, open **Interface** in both themes at 1280×900, 360×740 and
+640×300. Scroll to the last setting while the tabs and buttons stay visible.
+Use arrow keys and Home/End to switch tabs, then use search to jump to a
+setting. At phone widths, scroll across to Backup and verify that both text
+areas fit. Toggle conditional controls, check that Cancel discards edits,
+then confirm Reset and Save to persist the defaults.
+
+In Backup, download the JSON, change and save a setting, then select the
+downloaded file with **Import from file**. Confirm the original setting returns
+immediately. Cancel the picker and try an invalid JSON file to confirm the
+saved settings stay intact. At narrow widths, verify the file and text actions
+can wrap inside their cards.
+
+With the system motion preference set to its default, check section
+transitions, search results and reset confirmation. Switch tabs quickly
+while scrolling a long section. Then enable reduced motion and repeat to
+check that the new effects are skipped and visibility stays correct.
+
 1. `?page=home`: Shorts are hidden by default (Shorts shelf, Shorts rich items).
    Posts, live, upcoming, watched, mixes and chips are hidden by their own
    switches (`data-fixture="home-*"` marks each target).
@@ -72,6 +95,26 @@ Manual checklist:
    Enable loop and confirm `video.loop === true`.
 9. Save/reload: settings survive a reload; open with `?corrupt=1` and confirm
    the old/invalid blob does not crash the script.
+10. Open `?page=shorts` and enable Shorts in Settings. Use the three
+    reels to verify advance on end, the 0 and 2 second delays, and a duration
+    limit between the short and long fixture. During a delay, scroll manually
+    or use an arrow key and confirm no extra advance. Test pausing a long
+    item, raising the duration limit and disabling the feature mid-wait.
+11. Enable Dislikes and change the count format, tooltip and ratio
+    bar settings. Check the count on watch and Shorts, in both themes. With
+    the harness response stub, use `?votes-status=404` and `?votes-status=429`
+    on a watch page with a valid `v`. Use `?votes-network-error=1` for a
+    simulated offline request.
+    Check that the existing controls stay available when no count is shown.
+    The harness substitutes a local response for the real API. Use live
+    YouTube to verify the userscript manager's actual request.
+12. Enable Comment Kit and open it on the watch and channel
+    fixtures. Test searching, filtering, replies, pagination, seeking, the
+    heatmap, transcript and chat tabs, and CSV/JSON/TXT export. Use
+    `?comments=1000&chat=2000` to exercise the fixture limits. Reload in the
+    same tab to check open-state and cache restoration. Repeat at 360 px and
+    in both themes using only the keyboard, including the focus order and
+    announced result count.
 
 ## Boot timing and flicker
 
@@ -136,3 +179,17 @@ manual pass with the built script on `www.youtube.com`:
 2. Shorts shelves and the Shorts entry are hidden; toggles persist.
 3. Speed, quality, resume, PiP and hotkeys behave as configured.
 4. No uncaught console errors, including with `yp_debug` on.
+5. On live Shorts, repeat checks with 0, 2 and 10 second delays and a known
+   Short longer than the limit. Test the native next button, manual navigation
+   and disabling while a timer is pending.
+6. On live watch and Shorts pages, enable Dislikes and inspect requests to
+   `returnyoutubedislikeapi.com`. Confirm one request per uncached video ID,
+   no requests with the feature disabled, no stale counts after navigation and
+   the native rating controls still working. Check the layout in both themes.
+7. On a watch page with a long thread, verify that Comment Kit picks up native
+   replies after they are opened and adds results after scrolling to load
+   more. Open a native transcript with multiple languages and check the panel
+   follows the selected language. On a stream or premiere, test live chat
+   search and pause/resume during a burst. Disable the feature mid-playback
+   and confirm the panel, overlay and heatmap are removed. Check exported CSV
+   in Excel and LibreOffice with non-Latin text.

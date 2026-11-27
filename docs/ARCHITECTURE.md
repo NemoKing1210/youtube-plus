@@ -19,7 +19,7 @@ src/
 │   ├── scan.js              # One MutationObserver + SPA navigation watch
 │   ├── theme.js             # Mirrors YouTube's dark/light into data-yp-theme
 │   ├── storage.js           # Safe GM_getValue / GM_setValue
-│   ├── http.js              # GM_xmlhttpRequest wrapper (unused in v0.1)
+│   ├── http.js              # GM_xmlhttpRequest wrapper
 │   └── debug.js             # YP-#### codes, verbose mode
 ├── i18n/
 │   ├── index.js             # t(key, vars), configureLocale
@@ -29,11 +29,14 @@ src/
 │   ├── general/             # UI language, guide row, hotkey, toasts
 │   ├── interface/           # rules.js, finders.js, custom.js, css.js, engine.js
 │   ├── layout/              # grid.js, engine.js, derived settings
+│   ├── dislikes/            # votes, session cache and rating presentation
 │   ├── player/              # engine, speed, quality, volume, loop, positions, resume, pip, hotkeys
+│   ├── shorts/              # active reel, advance timer and settings
+│   ├── commentKit/          # local comment, transcript and live chat tools
 │   └── settings/            # dialog, renderer, controls, search, guide row, tabs
 ├── ui/                      # icons, toast, scroll lock
 ├── utils/                   # dom, format, keys
-└── styles/                  # tokens, base, settings, interface, player
+└── styles/                  # tokens, base, settings, interface, player, dislikes
 ```
 
 ## Boot sequence
@@ -136,32 +139,42 @@ and gets its tab in the settings dialog.
 ## Settings UI
 
 - The dialog edits a **draft** copy; nothing is saved or applied until Save.
-- Shell (`settings/panel.js`): a header with the title, search pill and close
-  button, a horizontal chip tab strip, a scrolling card body and a
-  Reset / Cancel / Save footer. Open, close and tab switches are CSS
-  animations; closing removes the root on `animationend` with a 200 ms
+- Shell (`settings/panel.js`): the header, navigation, scrolling settings pane
+  and action footer occupy separate CSS grid areas. Navigation uses a vertical
+  rail from 800 px and a horizontal tab list below that width. Arrow key
+  handling follows the current orientation. Closing removes the root on
+  `animationend` with a 200 ms
   fallback, and reopening always tears down any previous root first.
 - Tabs come from the registry (feature order, then declaration order) and may
-  carry an `icon` (shown in the chip) and a `badge(draft)`. A tab is a spec
+  carry an `icon` and a `badge(draft)`. A tab is a spec
   (`sections` → `controls`) or fully custom (`render(ctx)`).
 - Each section renders as a `.yp-card` with an optional `titleKey`, a
-  `descKey` sentence shown under the title, and its controls. Cards stagger in
-  through `--yp-card-index`; search indexes the section description together
-  with the control labels.
+  `descKey` sentence shown under the title, and its controls. Search indexes
+  the section description together with the control labels.
 - Controls: `switch`, `select`, `number`, `textarea`, `group`, `hint`,
   `button`, `custom`. `path` is relative to the feature's section and may be
   dotted. `hintKey` renders the secondary line under a control. Any control or
   section accepts `showIf(section, root)`.
 - `settings/reveal.js` shows and hides conditional rows with a short fade and
   rise. Its per-node timers are cancelled on rapid toggles, so a row can never
-  stick; reduced motion toggles `hidden` instantly.
+  stick. Repeating the same visibility leaves the current animation alone.
+  Reduced motion toggles `hidden` instantly.
+- Settings pane, search and confirmation entrances use CSS opacity and
+  movement on the heading or dialog. These effects and control press
+  transitions are enabled only when reduced motion is off.
 - `ui/ripple.js` adds the Material-style pointer ripple to buttons. It ignores
   keyboard activation and prefers-reduced-motion.
 - Search (`settings/search.js`) builds its index from the tab specs, so a
-  control is searchable as soon as it has a `labelKey`. Results open the tab,
-  scroll to `data-yp-find` and flash it.
-- Entry points: the guide row (`settings/nav-button.js`), the manager menu
-  command and `Ctrl+M` (`settings/hotkey.js`).
+  control is searchable as soon as it has a `labelKey`. Selecting a result
+  opens its tab, focuses the matching control if it is visible, and highlights
+  the destination. Escape clears the query before closing the dialog.
+- Backup exports the saved settings as text or a local JSON download. File
+  and text imports share schema normalization and apply immediately. A file
+  read can finish only while its dialog and Backup view are still current.
+- Entry points: the native button injected into the expanded guide
+  (`settings/nav-button.js`), the manager menu command and `Ctrl+M`
+  (`settings/hotkey.js`). The guide button owns its label, icon and styles
+  and is reinserted after a guide rebuild.
 
 ## Interface feature
 
@@ -244,23 +257,64 @@ mirrors the browser's `enterpictureinpicture` /
 `leavepictureinpicture` events. Disabling the feature removes the button,
 unbinds hotkeys, and resets `playbackRate = 1` and `loop = false`.
 
+## Shorts feature
+
+The Shorts settings tab exposes independent end-of-video and long-video rules
+behind one opt-in switch. The engine binds to the video in the active reel on
+scan and navigation. Both rules use one timer per item. Manual scrolling,
+navigation and disabling the feature clear pending work. When YouTube loops the
+native video, the engine observes the final quarter-second as well as the
+normal `ended` event. An advance uses YouTube's next button or scrolls to the
+next reel when the button is missing.
+
+## Dislikes feature
+
+The Dislikes tab enables an anonymous request to Return YouTube Dislike for
+the current video ID. The session cache holds up to 300 responses and expires
+positive results after 24 hours. Missing results expire sooner. Navigation and
+disabling the feature cancel obsolete requests, and HTTP 429 applies a client
+cooldown. Watch pages display the estimate in YouTube's rating group, with an
+optional ratio bar. Shorts display the estimate below the native dislike
+control or add a read-only icon and count below Like in the active action bar.
+Rates and counts are estimates from the service.
+
+## Comment Kit
+
+The opt-in panel reads comments, transcripts and live chat rendered by
+YouTube. Comment extraction normalizes records and can cache them per video
+for 24 hours. The panel filters the current source and paginates results.
+Clickable comment and transcript timestamps seek through the native player.
+The timed overlay and optional progress-bar heatmap update while a watch video
+is active. CSV, JSON and TXT exports are generated locally.
+
+The live chat item list uses a dedicated observer because chat bursts arrive
+faster than the shared scan interval. The observer is detached when the
+feature is disabled or the page or active chat root changes. The buffer holds
+up to 2,000 messages. Comments and transcripts use the shared lifecycle.
+
 ## Verified selectors and platform facts
 
-Confirmed against the source and the local harness for this version; no live
-`www.youtube.com` pass was performed. Live confirmation remains a manual step
-(see [DEVELOPMENT.md](DEVELOPMENT.md#verifying-a-selector-against-live-youtube)):
+The 2026-11-26 live pass queried the selector catalog on YouTube home,
+subscriptions, search, watch, Shorts and channel pages. The table records
+observed variants. Other variants remain in the catalog for older layouts
+and account-specific content. Repeat the checks when adding selectors
+(see [DEVELOPMENT.md](DEVELOPMENT.md#verifying-a-selector-against-live-youtube)).
 
 | Fact | Selector / API |
 |---|---|
 | App root | `ytd-app`, `#page-manager` |
-| Guide row | `ytd-guide-entry-renderer` with `a[title]`; match links by `a#endpoint[href]`, not the localized title |
+| Guide row | `ytd-guide-entry-renderer` with `a#endpoint[href]`; desktop Shorts also appeared as `a#endpoint[title="Shorts"]` with no `href`, while the mini guide used `/shorts/` |
 | Theme | `document.documentElement[dark]` |
 | Shorts shelf | `grid-shelf-view-model:has(a[href^="/shorts/"])`, `ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts])` |
-| Resume overlay | `ytd-thumbnail-overlay-resume-playback-renderer` inside a video item (used by `findWatched`) |
-| Most relevant shelf | `ytd-rich-shelf-renderer` title text, matched by the localized title list (`titles.js`) |
+| Resume overlay | `yt-thumbnail-overlay-progress-bar-view-model` in the current subscriptions grid. `findWatched` also supports the earlier `ytd-thumbnail-overlay-resume-playback-renderer`. |
+| Most relevant shelf | `ytd-rich-shelf-renderer #title` on subscriptions with Russian text `Самое актуальное`. `titles.js` recognizes matching titles in eight languages. |
 | Rich grid | `ytd-browse[page-subtype="…"] ytd-rich-grid-renderer`, `--ytd-rich-grid-items-per-row` |
 | Watch page | `ytd-watch-metadata`, `#secondary-inner #related`, `yt-lockup-view-model` |
-| Comments | `ytd-comments#comments` |
+| Comments | `ytd-comments#comments`, `ytd-comment-thread-renderer`, `ytd-comment-view-model` and its author, content, vote, publishing and replies IDs |
+| Transcript entry point | `ytd-video-description-transcript-section-renderer button` in expanded watch metadata |
+| Live chat | `yt-live-chat-app`, `yt-live-chat-item-list-renderer`, `yt-live-chat-text-message-renderer` and `yt-live-chat-author-badge-renderer` inside YouTube's chat frame |
+| Shorts playback | `ytd-shorts`, `#shorts-player video`, `#navigation-button-down button`. The mounted player identified the active reel in both `ytd-reel-video-renderer` and `ytd-reel-video-renderer-cow` layouts. |
+| Ratings | Watch metadata contained `like-button-view-model` and `dislike-button-view-model` inside a segmented control. Shorts used `reel-action-bar-view-model` with a native Like button. |
 | Player | `#movie_player`, `getVideoData`, `getPlaybackQuality`, `setPlaybackQualityRange`, `seekTo`, `setPlaybackRate`, `getDuration` |
 | Quality levels | `highres` (4320p / 8K), `hd2160` (2160p / 4K), `hd1440`, `hd1080`, `hd720`, `large`, `medium`, `small`, `tiny` |
 | Navigation | `yt-navigate-finish`, `yt-page-data-updated`, `yt-player-updated` |
@@ -275,11 +329,18 @@ harmless there; JS `find` passes are scoped to the active `#page-manager`.
 | `YP-1001` | bus listener threw |
 | `YP-1002` | settings persist failed |
 | `YP-1003` | settings import failed |
+| `YP-1004` | settings download failed to start |
 | `YP-1010` | feature hook threw |
 | `YP-1101` | interface rule threw while previewing |
 | `YP-1201` | player apply failed |
 | `YP-1202` | position storage failed |
 | `YP-1301` | layout render failed |
+| `YP-1401` | Shorts auto-scroll failed |
+| `YP-1501` | dislike count request failed |
+| `YP-1502` | dislike count rendering failed |
+| `YP-1601` | Comment Kit could not read page content |
+| `YP-1602` | Comment Kit cache operation failed |
+| `YP-1603` | Comment Kit panel could not render |
 
 Verbose traces: `localStorage.setItem('yp_debug', '1')`.
 

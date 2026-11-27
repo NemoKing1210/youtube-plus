@@ -1,23 +1,15 @@
-import { SCRIPT_NAME } from '../../core/constants.js';
+import { SCRIPT_NAME, SEL } from '../../core/constants.js';
 import { getFeatureSettings } from '../../core/settings.js';
 import { iconNode } from '../../ui/icons.js';
+import { el } from '../../utils/dom.js';
 
-/**
- * Adds a "YouTube Plus" row to the left guide by cloning a native entry, so
- * typography, spacing and hover chrome match. Re-inserted idempotently: the
- * guide is rebuilt on navigation and on late content updates.
- */
-
+const GUIDE_LIST = `${SEL.guide} ytd-guide-section-renderer #items`;
 const NAV_ATTR = 'data-yp-nav';
-const ROW_ATTR = 'data-yp-ui';
 
 let openHandler = () => {};
+
 export function setNavButtonHandler(fn) {
   openHandler = fn;
-}
-
-function guideList() {
-  return document.querySelector('ytd-guide-renderer ytd-guide-section-renderer #items');
 }
 
 function general() {
@@ -28,69 +20,29 @@ function general() {
   }
 }
 
-function applyLabel(row) {
-  const anchor = row.querySelector('a') || row;
-  anchor.setAttribute('title', SCRIPT_NAME);
-  anchor.setAttribute('aria-label', SCRIPT_NAME);
-
-  const labelNode =
-    anchor.querySelector('.title') ||
-    [...anchor.querySelectorAll('*')]
-      .filter((node) => node.children.length === 0 && node.textContent.trim())
-      .pop();
-  if (labelNode) labelNode.textContent = SCRIPT_NAME;
-  else anchor.append(document.createTextNode(SCRIPT_NAME));
-
-  const iconNodeTarget = anchor.querySelector('.icon, yt-icon, svg');
-  const glyph = iconNode('settings', 24);
-  if (iconNodeTarget && glyph) iconNodeTarget.replaceChildren(glyph);
-
-  const cfg = general();
-  const hint = cfg.hotkey !== false && cfg.hotkeyHint !== false;
-  anchor.title = hint ? `${SCRIPT_NAME} (Ctrl+M)` : SCRIPT_NAME;
-}
-
-function wire(row) {
-  row.setAttribute(NAV_ATTR, '');
-  row.setAttribute(ROW_ATTR, '');
-  row.removeAttribute('is-primary');
-  row.removeAttribute('aria-current');
-  row.querySelectorAll('[id]').forEach((node) => node.removeAttribute('id'));
-
-  const anchor = row.querySelector('a') || row;
-  anchor.addEventListener(
-    'click',
-    (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      openHandler();
-    },
-    true,
-  );
+function createButton() {
+  const button = el('button', 'yp-guide-button');
+  button.type = 'button';
+  button.setAttribute(NAV_ATTR, '');
+  button.setAttribute('aria-haspopup', 'dialog');
+  button.append(iconNode('settings', 24), el('span', 'yp-guide-button__label', SCRIPT_NAME));
+  button.addEventListener('click', () => openHandler());
+  return button;
 }
 
 export function ensureNavButton() {
   const cfg = general();
+  const list = cfg.navButton === false ? null : document.querySelector(GUIDE_LIST);
   const existing = [...document.querySelectorAll(`[${NAV_ATTR}]`)];
-
-  if (cfg.navButton === false) {
-    existing.forEach((row) => row.remove());
-    return;
+  const current = existing.find((node) => node.localName === 'button' && node.parentElement === list);
+  for (const node of existing) {
+    if (node !== current) node.remove();
   }
+  if (!list) return;
 
-  if (existing.length) {
-    existing.slice(1).forEach((row) => row.remove());
-    applyLabel(existing[0]);
-    return;
-  }
-
-  const list = guideList();
-  if (!list) return; // retried on the next scan
-  const template = list.querySelector('ytd-guide-entry-renderer');
-  if (!template) return;
-
-  const row = template.cloneNode(true);
-  wire(row);
-  applyLabel(row);
-  list.append(row);
+  const button = current ?? createButton();
+  const hint = cfg.hotkey !== false && cfg.hotkeyHint !== false;
+  const title = hint ? `${SCRIPT_NAME} (Ctrl+M)` : SCRIPT_NAME;
+  if (button.title !== title) button.title = title;
+  if (!current) list.append(button);
 }

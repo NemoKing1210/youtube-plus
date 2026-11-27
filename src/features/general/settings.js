@@ -1,3 +1,4 @@
+import { TOAST_POSITIONS } from '../../core/constants.js';
 import {
   LOCALE_FLAGS,
   LOCALE_FLAG_AUTO,
@@ -5,8 +6,6 @@ import {
   SUPPORTED_LOCALES,
   t,
 } from '../../i18n/index.js';
-
-export const TOAST_POSITIONS = ['top-right', 'top-left', 'bottom-right', 'bottom-left'];
 
 function languageOptions() {
   return [

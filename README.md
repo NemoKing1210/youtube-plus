@@ -28,6 +28,14 @@ the userscript manager's menu command, or with `Ctrl+M`.
 
 ## Features
 
+### Notifications
+
+In **General → Notifications**, choose left, center or right along the top
+or bottom edge. The default is **Bottom center**. Each notification has a
+status icon, title, message and close button. Set the duration to `0` to keep
+notifications visible until dismissed. Animations follow the system's
+reduced-motion preference.
+
 ### Interface clean-up
 
 One switch per rule, applied instantly and reversibly. The rules are grouped
@@ -79,6 +87,37 @@ outlined on the page behind the dialog.
 Speed is applied once per video: a speed you pick by hand is not overwritten
 until the next video.
 
+### Shorts
+
+Enable **Shorts** in Settings to move to the next Short automatically.
+**Auto-scroll** advances when a Short ends. **Skip long videos** advances when
+the current Short exceeds the configured duration. Both switches share an
+advance delay from 0 to 10 seconds. The feature starts disabled.
+
+### Dislikes
+
+Enable **Dislikes** in Settings to display estimates from [Return YouTube
+Dislike](https://returnyoutubedislike.com) on watch pages and Shorts. You can
+choose a number format and customize the ratio bar and tooltip on watch pages.
+On Shorts, the estimate appears below the native dislike control or below
+Like when YouTube does not provide one.
+The feature starts disabled. When enabled, it sends the ID of the current
+video to `returnyoutubedislikeapi.com` and caches results for the current session.
+
+### Comment Kit
+
+Enable **Comment Kit** in Settings to open a panel alongside YouTube comments.
+Search and filter loaded comments, jump to timestamps and use the optional
+seekbar heatmap. The Transcript and Live chat tabs work with content YouTube
+has loaded on the page. Export available results as CSV, JSON or TXT. Import
+CSV as UTF-8 with a comma separator in Excel or LibreOffice. Native `.xlsx`
+export is outside this feature.
+
+Comment Kit starts disabled. It processes content locally and keeps an
+optional short-lived comment cache. You can open replies with YouTube's own
+controls and include them in the panel. YouTube controls which transcripts,
+messages and comments are available to the panel.
+
 ### Advanced custom selectors
 
 Add your own CSS selectors in the Interface tab to hide extra elements. Each
@@ -90,15 +129,20 @@ rejected, as are empty and duplicate entries.
 
 ### Settings
 
-- A YouTube-native dialog: chip tabs across the top, grouped setting cards
-  with a short description per group and a hint under each control
-- Animated open, close and tab transitions, a card entrance stagger and a
-  reduced-motion-aware fallback
+- Open settings from the **YouTube Plus** button in the expanded sidebar
+  or with `Ctrl+M`.
+- A dialog styled to match YouTube in light and dark themes, with section
+  navigation on the left on desktop and scrollable tabs on smaller screens
+- A scrolling settings pane with grouped controls and persistent action
+  buttons. Navigate sections with the arrow keys or focus search with `/`.
+- Subtle transitions for sections, search and confirmation, with a
+  reduced-motion alternative
 - Search across every setting and card description, including tabs you have
   not opened
-- Backup tab: copy the settings JSON out, paste a backup in
+- Backup tab: download or copy saved settings as JSON, then restore from a
+  file or pasted text
 - About tab: version, repository, licence
-- Full-screen sheet layout with a safe-area footer on phones
+- Full-screen layout on phones, with controls that reflow at narrow widths
 - English, Russian, Chinese, Spanish, Portuguese, German, French and Japanese
 
 ## Development

@@ -4,11 +4,14 @@ import { generalTab } from '../src/features/general/settings.js';
 import { interfaceTab } from '../src/features/interface/settings.js';
 import { layoutTab } from '../src/features/layout/settings.js';
 import { playerTab } from '../src/features/player/settings.js';
+import { dislikesTab } from '../src/features/dislikes/settings.js';
+import { shortsTab } from '../src/features/shorts/settings.js';
+import { commentKitTab } from '../src/features/commentKit/settings.js';
 import { aboutTab } from '../src/features/settings/tabs/about.js';
 import { ICON_NAMES } from '../src/ui/icons.js';
 import en from '../src/i18n/locales/en.js';
 
-const tabs = [generalTab(), interfaceTab(), layoutTab(), playerTab(), aboutTab];
+const tabs = [generalTab(), interfaceTab(), layoutTab(), dislikesTab(), playerTab(), shortsTab(), commentKitTab(), aboutTab];
 
 test('tab ids, titles and icons', () => {
   const ids = tabs.map((tab) => tab.id);

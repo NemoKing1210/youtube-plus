@@ -3,9 +3,6 @@ import { GM_xmlhttpRequest } from '$';
 /**
  * Promise wrapper over GM_xmlhttpRequest (cross-origin, bypasses CORS).
  *
- * Retained for future network features; v0.1 does not import this module and
- * the userscript grants neither GM_xmlhttpRequest nor any @connect target.
- *
  * @param {object} options
  * @param {string} options.url
  * @param {'GET'|'POST'} [options.method]

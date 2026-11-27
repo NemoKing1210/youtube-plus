@@ -1,4 +1,4 @@
-import { SCRIPT_NAME, SCRIPT_VERSION } from '../../core/constants.js';
+import { SCRIPT_NAME } from '../../core/constants.js';
 import { emit } from '../../core/bus.js';
 import { getFeatures } from '../../core/features.js';
 import { getDefaults, getSettings, saveSettings } from '../../core/settings.js';
@@ -13,12 +13,13 @@ import { renderTab } from './renderer.js';
 import { buildIndex, highlight, searchIndex, tokenize } from './search.js';
 
 /**
- * Settings dialog shell: header, search, tab strip, lazily rendered panels
+ * Settings dialog shell: header, search, responsive tabs, lazily rendered panels
  * and a Reset / Cancel / Save footer. Panels edit a *draft* copy of the
  * settings; nothing is persisted (or applied) until Save.
  */
 
 const ROOT_ID = 'yp-settings-root';
+const WIDE_LAYOUT = '(min-width: 800px)';
 
 const cloneSettings = (settings) => JSON.parse(JSON.stringify(settings));
 
@@ -43,7 +44,6 @@ function tabButton(tab, active) {
   button.dataset.ypTab = tab.id;
   button.setAttribute('role', 'tab');
   button.setAttribute('aria-selected', active ? 'true' : 'false');
-  button.setAttribute('aria-controls', `yp-panel-${tab.id}`);
   button.tabIndex = active ? 0 : -1;
   const icon = tab.icon ? iconNode(tab.icon, 18) : null;
   if (icon) {
@@ -76,8 +76,11 @@ function ensurePanel(tab) {
   panel.id = `yp-panel-${tab.id}`;
   panel.setAttribute('role', 'tabpanel');
   panel.setAttribute('aria-labelledby', `yp-tab-${tab.id}`);
+  panel.tabIndex = 0;
   panel.hidden = true;
 
+  panel.append(el('h3', 'yp-settings__section-title', t(tab.titleKey)));
+  const opened = state;
   const view = renderTab(tab, {
     draft: state.draft,
     featureId: tab.featureId,
@@ -85,9 +88,11 @@ function ensurePanel(tab) {
     onPreview: (ruleId) => emit('interface:preview', ruleId),
     rerender: rerenderAll,
     reloadDraft,
+    isDialogOpen: () => state === opened && !opened.closing,
   });
   panel.append(view.root);
-  state.dialog.querySelector('.yp-settings__body').append(panel);
+  state.body.append(panel);
+  state.dialog.querySelector(`#yp-tab-${CSS.escape(tab.id)}`).setAttribute('aria-controls', panel.id);
 
   entry = { panel, view };
   state.rendered.set(tab.id, entry);
@@ -108,19 +113,23 @@ function activateTab(tabId) {
   });
   for (const [id, entry] of state.rendered) {
     const on = id === tabId;
-    entry.panel.classList.toggle('is-active', on);
     entry.panel.hidden = !on;
   }
   const activeButton = state.dialog.querySelector(`[data-yp-tab="${CSS.escape(tabId)}"]`);
   activeButton?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-  state.dialog.querySelector('.yp-settings__body').scrollTop = 0;
+  state.body.scrollTop = 0;
 }
 
 function rerenderAll() {
   if (!state) return;
+  const focusWasInPane = state.body.contains(document.activeElement);
   for (const { panel } of state.rendered.values()) panel.remove();
+  for (const button of state.dialog.querySelectorAll('[data-yp-tab]')) {
+    button.removeAttribute('aria-controls');
+  }
   state.rendered.clear();
   activateTab(state.active);
+  if (focusWasInPane) state.rendered.get(state.active)?.panel.focus({ preventScroll: true });
   updateBadges();
 }
 
@@ -151,16 +160,22 @@ function setActiveResult(index, scroll = true) {
 }
 
 function renderResults() {
-  if (!state?.search) return;
+  if (!state) return;
   const { search } = state;
   const query = search.input.value;
   const tokens = tokenize(query);
+  const searching = tokens.length > 0;
   search.clear.hidden = !query;
-  state.dialog.classList.toggle('is-searching', tokens.length > 0);
+  search.results.hidden = true;
+  search.empty.textContent = '';
+  search.input.setAttribute('aria-expanded', 'false');
+  search.input.removeAttribute('aria-activedescendant');
+  state.dialog.classList.toggle('is-searching', searching);
+  state.body.scrollTop = 0;
   search.results.replaceChildren();
   search.found = [];
   search.active = -1;
-  if (!tokens.length) {
+  if (!searching) {
     emit('interface:preview', null);
     return;
   }
@@ -168,9 +183,11 @@ function renderResults() {
   search.index ??= buildIndex(state.tabs);
   search.found = searchIndex(search.index, query);
   if (!search.found.length) {
-    search.results.append(el('p', 'yp-hits__empty', t('panel.searchEmpty')));
+    search.empty.textContent = t('panel.searchEmpty');
     return;
   }
+  search.results.hidden = false;
+  search.input.setAttribute('aria-expanded', 'true');
   search.found.forEach((entry, i) => {
     const item = el('button', 'yp-hit');
     item.type = 'button';
@@ -199,19 +216,19 @@ function renderResults() {
 }
 
 function clearSearch() {
-  if (!state?.search) return;
+  if (!state?.search.input.value) return;
   state.search.input.value = '';
   renderResults();
-  emit('interface:preview', null);
 }
 
-/** Open the tab of a result, scroll to the setting and flash it. */
+/** Open the tab of a result, focus the setting and bring it into view. */
 function jumpTo(entry) {
   clearSearch();
   activateTab(entry.tabId);
-  if (entry.kind === 'tab') return;
   const panel = state.rendered.get(entry.tabId)?.panel;
   if (!panel) return;
+  panel.focus({ preventScroll: true });
+  if (entry.kind === 'tab') return;
   const pick = (id) => panel.querySelector(`[data-yp-find="${CSS.escape(id)}"]`);
   const visible = (node) => {
     for (let current = node; current && current !== panel; current = current.parentElement) {
@@ -220,13 +237,18 @@ function jumpTo(entry) {
     return true;
   };
   let node = pick(entry.id);
-  if (!node || !visible(node)) {
+  if (node && visible(node)) {
+    node.querySelector('input, select, textarea, button, a[href]')?.focus({ preventScroll: true });
+  } else {
     const section = entry.sectionId ? pick(entry.sectionId) : null;
     if (section && visible(section)) node = section;
     else node = [...panel.querySelectorAll('.yp-card')].find(visible) ?? null;
   }
   if (!node) return;
-  node.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  node.scrollIntoView({
+    block: 'center',
+    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+  });
   node.classList.remove('is-found');
   void node.offsetWidth;
   node.classList.add('is-found');
@@ -242,10 +264,12 @@ function buildSearch() {
   input.type = 'text';
   input.autocomplete = 'off';
   input.spellcheck = false;
-  input.placeholder = `${t('panel.search')}  ( / )`;
+  input.placeholder = t('panel.search');
   input.setAttribute('role', 'combobox');
   input.setAttribute('aria-label', t('panel.search'));
-  input.setAttribute('aria-expanded', 'true');
+  input.setAttribute('aria-autocomplete', 'list');
+  input.setAttribute('aria-expanded', 'false');
+  input.setAttribute('aria-keyshortcuts', '/ Control+k Meta+k');
   input.setAttribute('aria-controls', 'yp-settings-results');
   const clear = el('button', 'yp-search__clear');
   clear.type = 'button';
@@ -258,8 +282,11 @@ function buildSearch() {
 
   const results = el('div', 'yp-hits');
   results.id = 'yp-settings-results';
+  results.hidden = true;
   results.setAttribute('role', 'listbox');
   results.setAttribute('aria-label', t('panel.search'));
+  const empty = el('p', 'yp-hits__empty');
+  empty.setAttribute('role', 'status');
 
   input.addEventListener('input', renderResults);
   clear.addEventListener('click', () => {
@@ -278,8 +305,7 @@ function buildSearch() {
 
   return {
     row,
-    results,
-    search: { input, clear, results, index: null, found: [], active: -1 },
+    search: { input, clear, results, empty, index: null, found: [], active: -1 },
   };
 }
 
@@ -291,6 +317,7 @@ function teardown() {
   if (!state) return;
   const root = state.root;
   clearTimeout(state.closeTimer);
+  state.layout.removeEventListener('change', state.updateTabLayout);
   document.removeEventListener('keydown', onKeyDown, true);
   emit('interface:preview', null);
   root.remove();
@@ -318,9 +345,9 @@ function focusables() {
   if (!state) return [];
   return [
     ...state.dialog.querySelectorAll(
-      'button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      'button, input, select, textarea, a[href], [tabindex]',
     ),
-  ].filter((node) => !node.hidden && node.offsetParent !== null);
+  ].filter((node) => node.tabIndex >= 0 && !node.matches(':disabled') && node.getClientRects().length);
 }
 
 function onKeyDown(event) {
@@ -343,7 +370,10 @@ function onKeyDown(event) {
 
   if (event.key === 'Escape') {
     event.stopPropagation();
-    closeSettings();
+    if (state.search.input.value) {
+      clearSearch();
+      state.search.input.focus();
+    } else closeSettings();
     return;
   }
   if (event.key !== 'Tab') return;
@@ -352,10 +382,14 @@ function onKeyDown(event) {
   if (!nodes.length) return;
   const first = nodes[0];
   const last = nodes[nodes.length - 1];
-  if (event.shiftKey && document.activeElement === first) {
+  const focused = document.activeElement;
+  if (!state.dialog.contains(focused)) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus();
+  } else if (event.shiftKey && (focused === first || focused === state.dialog)) {
     event.preventDefault();
     last.focus();
-  } else if (!event.shiftKey && document.activeElement === last) {
+  } else if (!event.shiftKey && focused === last) {
     event.preventDefault();
     first.focus();
   }
@@ -370,13 +404,14 @@ function save() {
 
 async function reset() {
   if (!state) return;
+  const opened = state;
   const confirmed = await confirmDialog({
     title: t('panel.resetTitle'),
     message: t('panel.resetText'),
     confirmLabel: t('common.reset'),
     danger: true,
   });
-  if (!confirmed || !state) return;
+  if (!confirmed || state !== opened) return;
   state.draft = getDefaults();
   rerenderAll();
 }
@@ -399,9 +434,11 @@ function buildDialog(tabs, active) {
   close.title = t('common.close');
   close.append(iconNode('close'));
   const heading = el('div', 'yp-settings__heading');
+  const mark = el('span', 'yp-settings__mark');
+  mark.append(iconNode('play', 18));
   const title = el('h2', 'yp-settings__title', SCRIPT_NAME);
   title.id = 'yp-settings-title';
-  heading.append(title, el('p', 'yp-settings__ver', `v${SCRIPT_VERSION}`));
+  heading.append(mark, title);
 
   const searchUi = buildSearch();
   header.append(heading, searchUi.row, close);
@@ -409,14 +446,20 @@ function buildDialog(tabs, active) {
   const strip = el('div', 'yp-settings__tabs');
   strip.setAttribute('role', 'tablist');
   strip.setAttribute('aria-label', SCRIPT_NAME);
+  const layout = window.matchMedia(WIDE_LAYOUT);
+  const updateTabLayout = () => {
+    strip.setAttribute('aria-orientation', layout.matches ? 'vertical' : 'horizontal');
+    strip.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  };
+  updateTabLayout();
+  layout.addEventListener('change', updateTabLayout);
   for (const tab of tabs) strip.append(tabButton(tab, tab.id === active));
 
   const body = el('div', 'yp-settings__body');
-  body.append(searchUi.results);
+  body.append(searchUi.search.results, searchUi.search.empty);
 
   const actions = el('div', 'yp-settings__actions');
   const resetButton = el('button', 'yp-btn-ui yp-btn-ui--text yp-btn-ui--danger', t('common.reset'));
-  const spacer = el('span', 'yp-settings__spacer');
   const cancelButton = el('button', 'yp-btn-ui yp-btn-ui--tonal', t('common.cancel'));
   const saveButton = el('button', 'yp-btn-ui yp-btn-ui--primary', t('common.save'));
   for (const button of [resetButton, cancelButton, saveButton]) {
@@ -426,7 +469,7 @@ function buildDialog(tabs, active) {
   resetButton.addEventListener('click', reset);
   cancelButton.addEventListener('click', closeSettings);
   saveButton.addEventListener('click', save);
-  actions.append(resetButton, spacer, cancelButton, saveButton);
+  actions.append(resetButton, cancelButton, saveButton);
 
   dialog.append(header, strip, body, actions);
   root.append(dialog);
@@ -437,7 +480,9 @@ function buildDialog(tabs, active) {
 
   strip.addEventListener('click', (event) => {
     const button = event.target.closest?.('[data-yp-tab]');
-    if (button) activateTab(button.dataset.ypTab);
+    if (!button) return;
+    clearSearch();
+    activateTab(button.dataset.ypTab);
   });
   strip.addEventListener('keydown', (event) => {
     const buttons = [...strip.querySelectorAll('[data-yp-tab]')];
@@ -445,18 +490,21 @@ function buildDialog(tabs, active) {
     if (!current) return;
     const index = buttons.indexOf(current);
     let next = index;
-    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (index + 1) % buttons.length;
-    else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+    const forward = layout.matches ? 'ArrowDown' : 'ArrowRight';
+    const backward = layout.matches ? 'ArrowUp' : 'ArrowLeft';
+    if (event.key === forward) next = (index + 1) % buttons.length;
+    else if (event.key === backward) {
       next = (index - 1 + buttons.length) % buttons.length;
     } else if (event.key === 'Home') next = 0;
     else if (event.key === 'End') next = buttons.length - 1;
     else return;
     event.preventDefault();
+    clearSearch();
     activateTab(buttons[next].dataset.ypTab);
-    buttons[next].focus();
+    buttons[next].focus({ preventScroll: true });
   });
 
-  return { root, dialog, search: searchUi.search };
+  return { root, dialog, body, layout, updateTabLayout, search: searchUi.search };
 }
 
 /** Open the settings dialog (optionally on a given tab id). */
@@ -466,15 +514,14 @@ export function openSettings(tabId) {
   if (!tabs.length) return;
   const active = tabs.some((tab) => tab.id === tabId) ? tabId : tabs[0].id;
 
-  const { root, dialog, search } = buildDialog(tabs, active);
+  const shell = buildDialog(tabs, active);
+  const { root, dialog } = shell;
   state = {
-    root,
-    dialog,
+    ...shell,
     draft: cloneSettings(getSettings()),
     tabs,
     active,
     rendered: new Map(),
-    search,
   };
 
   document.addEventListener('keydown', onKeyDown, true);

@@ -6,9 +6,31 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Opt-in Shorts auto-scroll with a configurable delay and a duration limit.
+- Opt-in dislike estimates from Return YouTube Dislike for watch pages and Shorts.
+- Opt-in Comment Kit for searching loaded YouTube comments, transcripts and live chat, with timestamp navigation and local exports.
+- Download settings as a JSON file and restore them from a local file in Backup.
+
+### Fixed
+
+- Keep dislike estimates inside the Watch rating button and near Like in Shorts.
+- Hide the desktop Shorts guide entry when YouTube omits its link destination.
+- Recognize watched videos with YouTube's newer thumbnail progress component.
+- Keep settings tabs and footer actions visible while long sections scroll.
+- Restore the label and click and keyboard activation of the YouTube Plus
+  button in the expanded YouTube sidebar.
+
 ### Changed
-- Redesigned the settings dialog: YouTube-native colors and controls, chip tabs,
-  grouped settings cards with descriptions, and reduced-motion-aware animations.
+- Notifications have themed cards with status icons and a close button, plus
+  motion that follows the system preference. They can appear at the top or
+  bottom center, with bottom center as the default.
+- Redesigned settings to match YouTube's light and dark themes, with desktop
+  side navigation, scrollable tabs on smaller screens, and larger controls.
+- Added quick transitions for sections, search and reset confirmation, plus
+  press feedback on tabs and switches. The effects follow the system
+  reduced-motion preference.
 
 ## [0.2.0] - 2026-11-12
 

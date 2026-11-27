@@ -46,11 +46,10 @@ function findId(spec) {
  * `ruleId`, which is sent through `ctx.onPreview` on hover/focus.
  */
 export function renderTab(tab, ctx) {
-  const root = el('div', 'yp-tab');
   if (typeof tab.render === 'function') {
-    root.append(tab.render(ctx));
-    return { root };
+    return { root: tab.render(ctx) };
   }
+  const root = el('div', 'yp-tab');
 
   const section = ctx.draft[ctx.featureId] ?? {};
   const visibility = [];
@@ -143,12 +142,11 @@ export function renderTab(tab, ctx) {
   }
 
   const sections = tab.sections || [];
-  sections.forEach((sectionSpec, index) => {
+  sections.forEach((sectionSpec) => {
     const box = el('section', 'yp-card');
     box.dataset.ypFind = `${tab.id}:${sectionSpec.titleKey ?? ''}`;
-    box.style.setProperty('--yp-card-index', String(Math.min(index, 4)));
     if (sectionSpec.titleKey) {
-      box.append(el('h3', 'yp-card__title', t(sectionSpec.titleKey)));
+      box.append(el('h4', 'yp-card__title', t(sectionSpec.titleKey)));
     }
     if (sectionSpec.descKey) box.append(el('p', 'yp-card__desc', t(sectionSpec.descKey)));
     for (const spec of sectionSpec.controls || []) append(box, spec);
@@ -163,6 +161,6 @@ export function renderTab(tab, ctx) {
 /** Build a card node for custom renderers. */
 export function createSection(title) {
   const box = el('section', 'yp-card');
-  if (title) box.append(el('h3', 'yp-card__title', title));
+  if (title) box.append(el('h4', 'yp-card__title', title));
   return box;
 }

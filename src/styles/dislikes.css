@@ -1,0 +1,82 @@
+:root[data-yp-theme='light'] {
+  --yp-like: #287a3c;
+  --yp-dislike: #bc363c;
+}
+
+:root[data-yp-theme='dark'] {
+  --yp-like: #73be57;
+  --yp-dislike: #ff676a;
+}
+
+ytd-watch-metadata #actions button:has(> .yp-dislike-count) {
+  inline-size: auto;
+}
+
+button > .yp-dislike-count {
+  margin-inline-start: 6px;
+  flex: none;
+}
+
+.yp-dislike-count {
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+reel-action-bar-view-model :is(like-button-view-model, dislike-button-view-model, #like-button, #dislike-button):has(> .yp-shorts-dislike) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.yp-shorts-dislike {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-block-start: 2px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--yp-fg);
+}
+
+.yp-shorts-dislike svg {
+  flex: none;
+}
+
+segmented-like-dislike-button-view-model:has(> .yp-rating-bar),
+ytd-segmented-like-dislike-button-renderer:has(> .yp-rating-bar) {
+  position: relative;
+}
+
+.yp-rating-bar {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: calc(100% + 1px);
+  display: flex;
+  block-size: 2px;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.yp-rating-bar__likes {
+  inline-size: var(--yp-like-share);
+  background: var(--yp-muted);
+}
+
+.yp-rating-bar__dislikes {
+  flex: 1;
+  background: var(--yp-border);
+}
+
+.yp-rating-bar--color .yp-rating-bar__likes {
+  background: var(--yp-like);
+}
+
+.yp-rating-bar--color .yp-rating-bar__dislikes {
+  background: var(--yp-dislike);
+}

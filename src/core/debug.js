@@ -14,6 +14,8 @@ export const Codes = {
   SETTINGS_PERSIST: 'YP-1002',
   /** Importing a settings backup failed. */
   SETTINGS_IMPORT: 'YP-1003',
+  /** Starting a settings backup download failed. */
+  SETTINGS_EXPORT: 'YP-1004',
   /** A feature hook (init/apply/scan/navigate) threw. */
   FEATURE_HOOK: 'YP-1010',
   /** An interface rule threw while previewing or applying. */
@@ -24,6 +26,12 @@ export const Codes = {
   PLAYER_POSITIONS: 'YP-1202',
   /** The layout feature failed to apply its settings. */
   LAYOUT_APPLY: 'YP-1301',
+  SHORTS_APPLY: 'YP-1401',
+  DISLIKES_API: 'YP-1501',
+  DISLIKES_RENDER: 'YP-1502',
+  COMMENTKIT_EXTRACT: 'YP-1601',
+  COMMENTKIT_CACHE: 'YP-1602',
+  COMMENTKIT_RENDER: 'YP-1603',
 };
 
 const BADGE_STYLE =

@@ -1,0 +1,274 @@
+.yp-comment-kit {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin-block-end: 12px;
+  overflow: auto;
+  max-block-size: min(760px, 78vh);
+  max-block-size: min(760px, 78dvh);
+  border: 1px solid var(--yp-border);
+  border-radius: var(--yp-radius-card);
+  background: var(--yp-surface);
+  color: var(--yp-fg);
+  font: 14px/1.45 var(--yp-font);
+  overflow-wrap: anywhere;
+  isolation: isolate;
+}
+
+.yp-comment-kit[data-yp-theme='light'] { color-scheme: light; }
+.yp-comment-kit[data-yp-theme='dark'] { color-scheme: dark; }
+
+.yp-comment-kit.yp-ck-fixed {
+  position: fixed;
+  z-index: 2000;
+  inset-inline-end: 12px;
+  inset-block-end: 12px;
+  inline-size: min(420px, calc(100% - 24px));
+  margin: 0;
+  box-shadow: var(--yp-shadow);
+}
+
+.yp-comment-kit [hidden] { display: none !important; }
+
+.yp-comment-kit button,
+.yp-comment-kit .yp-ck-action,
+.yp-ck-toggle {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 44px;
+  min-inline-size: 44px;
+  max-inline-size: 100%;
+  border: 1px solid var(--yp-border);
+  border-radius: var(--yp-radius-sm);
+  padding: 6px 10px;
+  background: var(--yp-surface-2);
+  color: var(--yp-fg);
+  font: inherit;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+}
+
+.yp-ck-toggle {
+  margin: 4px 6px;
+  font: 500 14px/1.3 var(--yp-font);
+}
+
+.yp-comment-kit button:enabled:hover,
+.yp-comment-kit .yp-ck-action:hover,
+.yp-ck-toggle:hover { background: var(--yp-surface-3); }
+.yp-comment-kit button:disabled { opacity: .55; cursor: default; }
+
+.yp-comment-kit :focus-visible,
+.yp-ck-toggle:focus-visible,
+.yp-ck-marker:focus-visible {
+  outline: 2px solid var(--yp-primary);
+  outline-offset: 2px;
+}
+
+.yp-ck-header,
+.yp-ck-tabs,
+.yp-ck-count {
+  padding: 8px 12px;
+  border-block-end: 1px solid var(--yp-border);
+}
+
+.yp-ck-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.yp-ck-header h2 {
+  margin: 0;
+  color: inherit;
+  font: 700 18px/1.3 var(--yp-font);
+}
+
+.yp-ck-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.yp-ck-tabs button[aria-selected='true'] {
+  background: var(--yp-primary-soft);
+  border-color: var(--yp-primary);
+  color: var(--yp-primary);
+}
+
+.yp-ck-count {
+  border-block-start: 1px solid var(--yp-border);
+  border-block-end: 0;
+  color: var(--yp-muted);
+}
+
+.yp-ck-view {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.yp-ck-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+.yp-ck-controls > .yp-ck-field { flex: 1 1 130px; }
+
+.yp-ck-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-inline-size: 0;
+}
+
+.yp-ck-field input,
+.yp-ck-field select {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  min-block-size: 44px;
+  border: 1px solid var(--yp-border);
+  border-radius: var(--yp-radius-sm);
+  padding: 6px 8px;
+  background: var(--yp-bg);
+  color: var(--yp-fg);
+  font: inherit;
+}
+
+.yp-ck-field.yp-ck-check {
+  min-block-size: 44px;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: start;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.yp-ck-check input {
+  flex: none;
+  min-block-size: 0;
+  inline-size: 18px;
+  block-size: 18px;
+  margin: 0;
+  accent-color: var(--yp-primary);
+}
+
+.yp-comment-kit summary {
+  box-sizing: border-box;
+  align-content: center;
+  min-block-size: 44px;
+  padding: 4px 0;
+  color: var(--yp-primary);
+  cursor: pointer;
+}
+
+.yp-ck-poll { border-collapse: collapse; margin-block-start: 6px; }
+.yp-ck-poll th, .yp-ck-poll td {
+  padding: 4px 8px;
+  border: 1px solid var(--yp-border);
+  text-align: start;
+}
+
+.yp-ck-status { margin: 0; color: var(--yp-muted); }
+.yp-ck-status:empty { display: none; }
+
+.yp-ck-list,
+.yp-ck-timed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yp-ck-chat-list {
+  overflow-y: auto;
+  max-block-size: min(44vh, 370px);
+}
+
+.yp-ck-row {
+  min-inline-size: 0;
+  border: 1px solid var(--yp-border);
+  border-radius: var(--yp-radius-sm);
+  padding: 8px;
+}
+
+.yp-ck-reply { border-inline-start: 3px solid var(--yp-primary); }
+.yp-ck-segment { display: flex; align-items: start; gap: 8px; }
+
+.yp-ck-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  font-size: 12px;
+  color: var(--yp-muted);
+}
+
+.yp-ck-meta strong { color: var(--yp-fg); }
+.yp-ck-text { margin: 4px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.yp-ck-row-actions { margin-block-start: 6px; font-size: 12px; }
+.yp-ck-highlight { background: var(--yp-primary); color: var(--yp-on-primary); }
+.yp-ck-badge { padding: 1px 6px; border-radius: var(--yp-radius-sm); background: var(--yp-primary-soft); }
+.yp-comment-kit button.yp-ck-time { color: var(--yp-primary); }
+
+.yp-ck-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.yp-ck-flash { animation: yp-ck-flash 700ms ease-out; }
+@keyframes yp-ck-flash {
+  from { background: var(--yp-primary-soft); border-color: var(--yp-primary); }
+  to { background: transparent; }
+}
+
+.yp-comment-kit.yp-ck-timed {
+  position: absolute;
+  z-index: 32;
+  inset-inline-end: 10px;
+  inset-block-start: 10px;
+  inline-size: min(320px, 85%);
+  max-block-size: 55%;
+  margin: 0;
+}
+
+.yp-ck-timed-list { padding: 6px 12px; font-size: 12px; }
+
+.yp-ck-heatmap {
+  position: absolute;
+  z-index: 31;
+  inset-inline: 0;
+  inset-block-end: 100%;
+  block-size: 14px;
+  pointer-events: none;
+}
+
+.yp-ck-marker {
+  position: absolute;
+  inset-block-end: 0;
+  inline-size: min(10px, 1%);
+  min-inline-size: 3px;
+  block-size: var(--yp-marker-height);
+  padding: 0;
+  border: 1px solid var(--yp-on-primary);
+  border-radius: 3px;
+  background: var(--yp-primary);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yp-ck-flash { animation: none; border-color: var(--yp-primary); }
+}

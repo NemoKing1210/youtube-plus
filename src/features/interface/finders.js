@@ -7,7 +7,8 @@ import { isMostRelevantTitle } from './titles.js';
 
 const ITEM_SELECTOR =
   'ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer, ytd-compact-video-renderer';
-const RESUME_SELECTOR = 'ytd-thumbnail-overlay-resume-playback-renderer';
+const RESUME_SELECTOR =
+  'ytd-thumbnail-overlay-resume-playback-renderer, yt-thumbnail-overlay-progress-bar-view-model';
 
 /**
  * Videos YouTube remembers a playback position for show a resume overlay on

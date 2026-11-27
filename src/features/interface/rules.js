@@ -92,6 +92,7 @@ export const RULES = [
     hint: true,
     css: [
       'ytd-guide-entry-renderer:has(a[href="/shorts"], a[href^="/shorts/"])',
+      'ytd-guide-entry-renderer:has(a#endpoint[title="Shorts"]:not([href]))',
       'ytd-mini-guide-entry-renderer:has(a[href="/shorts"], a[href^="/shorts/"])',
     ],
   },

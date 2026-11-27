@@ -10,6 +10,14 @@ manager, which updates it from `main`. Only the latest release is supported.
 | Latest release (`0.2.x` on `main`) | Yes |
 | Older releases | No |
 
+## External requests
+
+Dislikes is disabled by default. When enabled, it sends the active YouTube
+video ID to `https://returnyoutubedislikeapi.com/votes` in an anonymous GET
+request. The request carries no cookies or YouTube credentials. Results are
+cached in memory for the current browser session. Comment Kit processes
+content YouTube has already loaded and stores its optional cache locally.
+
 ## Reporting a vulnerability
 
 Please report suspected vulnerabilities **privately**. Do not open a public

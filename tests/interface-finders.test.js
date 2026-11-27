@@ -13,6 +13,15 @@ test('findWatched tolerates an empty page', () => {
   assert.deepEqual(findWatched({ querySelectorAll: () => [] }), []);
 });
 
+test('findWatched recognizes the current thumbnail progress overlay', () => {
+  const watched = {
+    querySelector: (selector) => selector.includes('yt-thumbnail-overlay-progress-bar-view-model')
+      ? {} : null,
+  };
+  const scope = { querySelectorAll: () => [watched] };
+  assert.deepEqual(findWatched(scope), [watched]);
+});
+
 test('findMostRelevant marks the section containing the shelf', () => {
   const section = { id: 'section' };
   const shelf = {

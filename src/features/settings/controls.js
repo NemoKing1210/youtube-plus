@@ -6,25 +6,38 @@ export function createRow(className = '') {
   return el('div', `yp-row${className ? ` ${className}` : ''}`);
 }
 
-function textBlock(label, hint) {
-  const text = el('div', 'yp-row__text');
-  text.append(el('span', 'yp-row__label', label));
-  if (hint) text.append(el('span', 'yp-row__hint', hint));
+let nextControlId = 0;
+
+function textBlock(control, label, hint, wrapped = false) {
+  control.id = `yp-settings-control-${++nextControlId}`;
+  const text = el('span', 'yp-row__text');
+  const name = el(wrapped ? 'span' : 'label', 'yp-row__label', label);
+  if (wrapped) {
+    name.id = `${control.id}-label`;
+    control.setAttribute('aria-labelledby', name.id);
+  } else name.htmlFor = control.id;
+  text.append(name);
+  if (hint) {
+    const description = el('span', 'yp-row__hint', hint);
+    description.id = `${control.id}-hint`;
+    control.setAttribute('aria-describedby', description.id);
+    text.append(description);
+  }
   return text;
 }
 
 export function createSwitch({ label, hint, checked, onChange }) {
-  const row = createRow('yp-row--switch');
-  const control = el('label', 'yp-switch');
+  const row = el('label', 'yp-row yp-row--switch');
+  const control = el('span', 'yp-switch');
   const input = el('input', 'yp-switch__input');
   input.type = 'checkbox';
   input.checked = Boolean(checked);
-  input.setAttribute('aria-label', label);
+  input.setAttribute('role', 'switch');
   input.addEventListener('change', () => onChange(input.checked));
   const track = el('span', 'yp-switch__track');
   track.setAttribute('aria-hidden', 'true');
   control.append(input, track);
-  row.append(textBlock(label, hint), control);
+  row.append(textBlock(input, label, hint, true), control);
   return { row, input };
 }
 
@@ -32,9 +45,8 @@ export function createSelect({ label, hint, options, value, onChange }) {
   const row = createRow('yp-row--select');
   const wrapper = el('span', 'yp-select');
   const control = el('select', 'yp-select__input');
-  control.setAttribute('aria-label', label);
   for (const option of options) {
-    const node = document.createElement('option');
+    const node = el('option');
     node.value = option.value;
     node.textContent = option.label;
     node.selected = option.value === value;
@@ -44,7 +56,7 @@ export function createSelect({ label, hint, options, value, onChange }) {
   const chevron = el('span', 'yp-select__chevron');
   chevron.append(iconNode('chevronDown', 18));
   wrapper.append(control, chevron);
-  row.append(textBlock(label, hint), wrapper);
+  row.append(textBlock(control, label, hint), wrapper);
   return { row, control };
 }
 
@@ -53,7 +65,6 @@ export function createNumber({ label, hint, value, min, max, step, onChange }) {
   const control = el('input', 'yp-number');
   control.type = 'number';
   control.inputMode = 'numeric';
-  control.setAttribute('aria-label', label);
   if (Number.isFinite(min)) control.min = String(min);
   if (Number.isFinite(max)) control.max = String(max);
   if (Number.isFinite(step)) control.step = String(step);
@@ -67,7 +78,7 @@ export function createNumber({ label, hint, value, min, max, step, onChange }) {
     onChange(next);
   };
   control.addEventListener('change', commit);
-  row.append(textBlock(label, hint), control);
+  row.append(textBlock(control, label, hint), control);
   return { row, control };
 }
 
@@ -76,11 +87,10 @@ export function createTextarea({ label, hint, value, placeholder, rows = 4, onCh
   const control = el('textarea', 'yp-textarea');
   control.rows = rows;
   control.value = String(value ?? '');
-  control.setAttribute('aria-label', label);
   if (placeholder) control.placeholder = placeholder;
   control.spellcheck = false;
   control.addEventListener('change', () => onChange(control.value));
-  row.append(textBlock(label, hint), control);
+  row.append(textBlock(control, label, hint), control);
   return { row, control };
 }
 
@@ -100,8 +110,8 @@ export function createButton({ label, variant = 'ghost', onClick }) {
   return button;
 }
 
-export function createButtonRow(button) {
+export function createButtonRow(...buttons) {
   const row = createRow('yp-row--button');
-  row.append(button);
+  row.append(...buttons);
   return row;
 }

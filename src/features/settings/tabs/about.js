@@ -18,7 +18,7 @@ export const aboutTab = {
     mark.append(iconNode('settings', 28));
     const text = el('div', 'yp-about__text');
     text.append(
-      el('h3', 'yp-about__name', SCRIPT_NAME),
+      el('h4', 'yp-about__name', SCRIPT_NAME),
       el('p', 'yp-about__desc', t('about.description')),
       el('span', 'yp-about__version', `v${SCRIPT_VERSION}`),
     );

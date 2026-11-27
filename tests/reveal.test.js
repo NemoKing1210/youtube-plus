@@ -54,6 +54,18 @@ test('showing fades in through is-revealing and clears it after the duration', a
   restore();
 });
 
+test('an already visible row does not replay its entrance on every settings edit', () => {
+  const restore = setReducedMotion(false);
+  try {
+    const node = fakeNode();
+    setRevealed(node, true);
+    assert.equal(node.hidden, false);
+    assert.equal(node.classes.size, 0);
+  } finally {
+    restore();
+  }
+});
+
 test('hiding is capped at 120ms even when a longer duration is passed', async () => {
   const restore = setReducedMotion(false);
   const node = fakeNode();

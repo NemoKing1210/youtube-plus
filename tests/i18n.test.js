@@ -14,7 +14,7 @@ test('t uses the configured locale, falls back to English, then to the key', () 
 
 test('fmt substitutes named variables', () => {
   configureLocale('en');
-  assert.equal(t('toast.progress', { percent: 42 }), '42%');
+  assert.equal(t('dislikes.estimate', { count: 42 }), 'Estimated dislikes (42)');
 });
 
 test('the language auto option follows the active locale', () => {

@@ -18,6 +18,9 @@ export const SETTINGS_KEY = 'yp_settings_v1';
 export const POSITIONS_KEY = 'yp_positions_v1';
 export const VOLUME_KEY = 'yp_volume_v1';
 
+export const TOAST_POSITIONS = ['top-left', 'top-center', 'top-right', 'bottom-left', 'bottom-center', 'bottom-right'];
+export const DEFAULT_TOAST_POSITION = 'bottom-center';
+
 /* ------------------------------------------------------------------ */
 /* DOM conventions                                                     */
 /* ------------------------------------------------------------------ */
@@ -60,4 +63,11 @@ export const SEL = Object.freeze({
   player: '#movie_player',
   video: '#movie_player video',
   rightControls: '.ytp-right-controls',
+  shortsRoot: 'ytd-shorts',
+  shortsActive: 'ytd-reel-video-renderer[is-active], :is(ytd-reel-video-renderer, ytd-reel-video-renderer-cow):has(#shorts-player video)',
+  shortsVideo: 'video',
+  shortsNext: '#navigation-button-down button',
+  shortsActionBar: 'reel-action-bar-view-model',
+  watchLike: 'ytd-watch-metadata #actions like-button-view-model',
+  watchDislike: 'ytd-watch-metadata #actions dislike-button-view-model',
 });

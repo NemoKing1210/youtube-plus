@@ -47,7 +47,8 @@ export default defineConfig({
         license: 'MIT',
         icon: 'https://www.youtube.com/favicon.ico',
         match: ['https://www.youtube.com/*', 'https://youtube.com/*'],
-        grant: ['GM_getValue', 'GM_setValue', 'GM_registerMenuCommand'],
+        grant: ['GM_getValue', 'GM_setValue', 'GM_registerMenuCommand', 'GM_xmlhttpRequest'],
+        connect: ['returnyoutubedislikeapi.com'],
         'run-at': 'document-start',
         noframes: true,
       },
@@ -57,8 +58,8 @@ export default defineConfig({
       build: {
         fileName: 'youtube-plus.user.js',
         metaFileName: true,
-        // The default injector references GM_addStyle, which would add a
-        // fourth grant; build the style node instead. This function is
+        // The default injector references GM_addStyle, which would add an
+        // extra grant; build the style node instead. This function is
         // stringified into the bundle, so it must stay self-contained. A
         // manager can inject before <html> exists: defer the append to
         // DOMContentLoaded instead of dereferencing a null root.

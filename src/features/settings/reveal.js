@@ -15,13 +15,17 @@ function prefersReducedMotion() {
 export function setRevealed(node, visible, { duration = 180 } = {}) {
   if (!node) return;
 
+  const immediate = !node.isConnected || prefersReducedMotion();
+  const willBeVisible = !node.hidden && !node.classList.contains('is-hiding');
+  if (!immediate && visible === willBeVisible) return;
+
   const pending = timers.get(node);
   if (pending) clearTimeout(pending);
   timers.delete(node);
 
   // Not connected yet (first render) or reduced motion: settle immediately so
   // a freshly opened tab never flashes rows that should start hidden.
-  if (prefersReducedMotion() || !node.isConnected) {
+  if (immediate) {
     node.hidden = !visible;
     node.classList.remove('is-revealing', 'is-hiding');
     return;
@@ -38,11 +42,6 @@ export function setRevealed(node, visible, { duration = 180 } = {}) {
         timers.delete(node);
       }, duration),
     );
-    return;
-  }
-
-  if (node.hidden) {
-    node.classList.remove('is-revealing', 'is-hiding');
     return;
   }
 
